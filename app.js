@@ -90,7 +90,9 @@ function securityMarket(code) {
 function updateMarketTypeHelp() {
   const market = securityMarket($('#security').value);
   const selected = marketTypeConfig[market]?.types.find(type => type.value === $('#market-type').value);
-  $('#market-type-help').textContent = selected?.help || '市价类型由证券所属市场决定。';
+  $('#market-type-help').textContent = selected?.help || (market
+    ? '请选择本次委托使用的市价类型。'
+    : '选择证券代码后显示该市场支持的市价类型。');
 }
 
 function updateMarketTypeOptions() {
