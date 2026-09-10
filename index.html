@@ -119,6 +119,7 @@
               <div class="manual-title collapsible" data-target="manual-body"><span>Manual Order Entry</span><span class="caret">▾</span></div>
               <form class="manual-body" id="manual-body">
                 <span class="trade-tag">普通交易</span>
+                <div class="manual-error hidden" id="manual-error" role="alert" aria-live="polite"></div>
                 <div class="form-grid">
                   <div class="form-row">
                     <label class="field"><span>资金账号 <small>110010001</small></span><select id="account"><option>11001000101-CNY</option></select></label>
@@ -131,9 +132,8 @@
                   <div class="form-row order-type-row">
                     <label class="field"><span>订单类型</span><select id="order-type"><option value="limit">Limit</option><option value="market">Market</option></select></label>
                     <label class="field market-type-field hidden" id="market-type-field">
-                      <span>市价类型 <small id="market-scope">请先选择证券代码</small></span>
-                      <select id="market-type" disabled><option value="">请先选择证券代码</option></select>
-                      <em class="field-help" id="market-type-help">选择证券代码后显示该市场支持的市价类型。</em>
+                      <span>市价类型</span>
+                      <select id="market-type" disabled><option value="">请选择市价类型</option></select>
                     </label>
                   </div>
                   <div class="form-row key-order-row">

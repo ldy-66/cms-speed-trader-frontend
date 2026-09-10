@@ -13,22 +13,20 @@ const state = {
 // 交易所支持项应最终由后端/柜台配置返回；这里用于前端原型演示。
 const marketTypeConfig = {
   SH: {
-    label: '沪市',
     types: [
-      { value: 'five-ioc', label: '最优五档即时成交剩余撤销', help: '依次成交对手方最优五档，未成交部分自动撤销。' },
-      { value: 'five-limit', label: '最优五档即时成交剩余转限价', help: '先成交对手方最优五档，未成交部分按规则转为限价申报。' },
-      { value: 'counterparty', label: '对手方最优价格', help: '以申报进入交易主机时的对手方最优报价作为申报价格。' },
-      { value: 'own-best', label: '本方最优价格', help: '以申报进入交易主机时的本方最优报价作为申报价格。' },
+      { value: 'five-ioc', label: '最优五档即时成交剩余撤销' },
+      { value: 'five-limit', label: '最优五档即时成交剩余转限价' },
+      { value: 'counterparty', label: '对手方最优价格' },
+      { value: 'own-best', label: '本方最优价格' },
     ],
   },
   SZ: {
-    label: '深市',
     types: [
-      { value: 'counterparty', label: '对手方最优价格', help: '以申报进入交易主机时的对手方最优报价作为申报价格。' },
-      { value: 'own-best', label: '本方最优价格', help: '以申报进入交易主机时的本方最优报价作为申报价格。' },
-      { value: 'five-ioc', label: '最优五档即时成交剩余撤销', help: '依次成交对手方最优五档，未成交部分自动撤销。' },
-      { value: 'ioc', label: '即时成交剩余撤销（IOC）', help: '立即成交可成交数量，未成交部分自动撤销。' },
-      { value: 'fok', label: '全额成交或撤销（FOK）', help: '仅在能够立即全部成交时执行，否则整笔申报自动撤销。' },
+      { value: 'counterparty', label: '对手方最优价格' },
+      { value: 'own-best', label: '本方最优价格' },
+      { value: 'five-ioc', label: '最优五档即时成交剩余撤销' },
+      { value: 'ioc', label: '即时成交剩余撤销（IOC）' },
+      { value: 'fok', label: '全额成交或撤销（FOK）' },
     ],
   },
 };
@@ -87,12 +85,10 @@ function securityMarket(code) {
   return '';
 }
 
-function updateMarketTypeHelp() {
-  const market = securityMarket($('#security').value);
-  const selected = marketTypeConfig[market]?.types.find(type => type.value === $('#market-type').value);
-  $('#market-type-help').textContent = selected?.help || (market
-    ? '请选择本次委托使用的市价类型。'
-    : '选择证券代码后显示该市场支持的市价类型。');
+function setManualError(message = '') {
+  const error = $('#manual-error');
+  error.textContent = message;
+  error.classList.toggle('hidden', !message);
 }
 
 function updateMarketTypeOptions() {
@@ -102,18 +98,15 @@ function updateMarketTypeOptions() {
   const previous = select.value;
 
   if (!config) {
-    select.innerHTML = '<option value="">请先选择证券代码</option>';
+    select.innerHTML = '<option value="">请选择市价类型</option>';
     select.disabled = true;
-    $('#market-scope').textContent = '请先选择证券代码';
   } else {
     select.disabled = false;
     select.innerHTML = '<option value="">请选择市价类型</option>' + config.types
       .map(type => `<option value="${type.value}">${type.label}</option>`)
       .join('');
     if (config.types.some(type => type.value === previous)) select.value = previous;
-    $('#market-scope').textContent = `${config.label}可用类型`;
   }
-  updateMarketTypeHelp();
 }
 
 function updateOrderControls() {
@@ -123,7 +116,12 @@ function updateOrderControls() {
   $('#price-label').textContent = isMarket ? '保护限价' : '价格';
   $('#amount-label').textContent = isMarket ? '参考金额' : '委托金额';
   priceInput.placeholder = isMarket ? '最高买价 / 最低卖价' : '';
-  if (isMarket) updateMarketTypeOptions();
+  if (isMarket) {
+    updateMarketTypeOptions();
+    setManualError($('#security').value ? '' : '请先选择证券代码');
+  } else {
+    setManualError();
+  }
   calculateAmount();
 }
 
@@ -134,7 +132,8 @@ function placeOrder(side) {
   const marketType = $('#market-type').value;
   const marketTypeLabel = $('#market-type').selectedOptions[0]?.textContent || '';
   const orderType = isMarket ? `Market · ${marketTypeLabel}` : 'Limit';
-  if (!security) return toast('请选择证券代码');
+  if (!security) return setManualError('请先选择证券代码');
+  setManualError();
   if (quantity <= 0) return toast('请输入有效数量');
   if (isMarket && !marketType) return toast('请选择市价类型');
   if (Number($('#price').value || 0) <= 0) return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格');
@@ -230,9 +229,13 @@ $$('.stepper button').forEach(button => button.addEventListener('click', () => {
 $('#quantity').addEventListener('input', calculateAmount);
 $('#price').addEventListener('input', calculateAmount);
 $('#order-type').addEventListener('change', updateOrderControls);
-$('#market-type').addEventListener('change', updateMarketTypeHelp);
 $('#security').addEventListener('change', () => {
-  if ($('#order-type').value === 'market') updateMarketTypeOptions();
+  if ($('#order-type').value === 'market') {
+    updateMarketTypeOptions();
+    setManualError($('#security').value ? '' : '请先选择证券代码');
+  } else if ($('#security').value) {
+    setManualError();
+  }
 });
 $$('.submit').forEach(button => button.addEventListener('click', () => placeOrder(button.dataset.side)));
 
