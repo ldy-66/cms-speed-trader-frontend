@@ -34,9 +34,10 @@ const marketTypeConfig = {
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-function toast(message) {
+function toast(message, type = 'info') {
   const el = $('#toast');
   el.textContent = message;
+  el.classList.toggle('error', type === 'error');
   el.classList.add('show');
   clearTimeout(toast.timer);
   toast.timer = setTimeout(() => el.classList.remove('show'), 2200);
@@ -85,12 +86,6 @@ function securityMarket(code) {
   return '';
 }
 
-function setManualError(message = '') {
-  const error = $('#manual-error');
-  error.textContent = message;
-  error.classList.toggle('hidden', !message);
-}
-
 function updateMarketTypeOptions() {
   const select = $('#market-type');
   const market = securityMarket($('#security').value);
@@ -118,9 +113,7 @@ function updateOrderControls() {
   priceInput.placeholder = isMarket ? '最高买价 / 最低卖价' : '';
   if (isMarket) {
     updateMarketTypeOptions();
-    setManualError($('#security').value ? '' : '请先选择证券代码');
-  } else {
-    setManualError();
+    if (!$('#security').value) toast('请先选择证券代码', 'error');
   }
   calculateAmount();
 }
@@ -132,11 +125,10 @@ function placeOrder(side) {
   const marketType = $('#market-type').value;
   const marketTypeLabel = $('#market-type').selectedOptions[0]?.textContent || '';
   const orderType = isMarket ? `Market · ${marketTypeLabel}` : 'Limit';
-  if (!security) return setManualError('请先选择证券代码');
-  setManualError();
-  if (quantity <= 0) return toast('请输入有效数量');
-  if (isMarket && !marketType) return toast('请选择市价类型');
-  if (Number($('#price').value || 0) <= 0) return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格');
+  if (!security) return toast('请先选择证券代码', 'error');
+  if (quantity <= 0) return toast('请输入有效数量', 'error');
+  if (isMarket && !marketType) return toast('请选择市价类型', 'error');
+  if (Number($('#price').value || 0) <= 0) return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
 
   const entrustBody = $('#entrust-rows');
   const tr = document.createElement('tr');
@@ -232,9 +224,7 @@ $('#order-type').addEventListener('change', updateOrderControls);
 $('#security').addEventListener('change', () => {
   if ($('#order-type').value === 'market') {
     updateMarketTypeOptions();
-    setManualError($('#security').value ? '' : '请先选择证券代码');
-  } else if ($('#security').value) {
-    setManualError();
+    if (!$('#security').value) toast('请先选择证券代码', 'error');
   }
 });
 $$('.submit').forEach(button => button.addEventListener('click', () => placeOrder(button.dataset.side)));
