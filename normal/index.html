@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>对冲台管理端 · 普通版</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="titlebar">
+        <span class="brand-mark">m</span>
+        <span class="app-title">对冲台管理端 - 同余点这里-新</span>
+        <span class="user-icon" aria-hidden="true">♙</span>
+        <span class="user-name">sunjianing</span>
+        <span class="title-spacer"></span>
+        <span class="status-icon" aria-hidden="true">♜</span>
+        <span class="status-icon" aria-hidden="true">◉</span>
+        <span class="status-icon" aria-hidden="true">◴</span>
+        <span class="title-divider"></span>
+        <button class="window-button" aria-label="最小化">—</button>
+        <button class="window-button" aria-label="最大化">□</button>
+        <button class="window-button close" aria-label="关闭">×</button>
+      </header>
+
+      <div class="workspace">
+        <aside class="sidebar" aria-label="主导航">
+          <div class="nav-stack">
+            <button class="nav-item active" data-section="行情">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m6 16 4-5 3 2 5-7"/></svg>
+              <span>行情</span>
+            </button>
+            <button class="nav-item" data-section="交易">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3-3 3 3M10 6v8M17 15l-3 3-3-3M14 18v-8"/></svg>
+              <span>交易</span>
+            </button>
+            <button class="nav-item" data-section="融券">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M7 9h10M7 15h10M9 7l-2 5 2 5M15 7l2 5-2 5"/></svg>
+              <span>融券</span>
+            </button>
+            <button class="nav-item" data-section="数据">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="10" cy="5" rx="6" ry="3"/><path d="M4 5v9c0 1.7 2.7 3 6 3M16 5v5M4 9c0 1.7 2.7 3 6 3"/><circle cx="17" cy="16" r="4"/><path d="m20 19 3 3"/></svg>
+              <span>数据</span>
+            </button>
+            <button class="nav-item" data-section="风控">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.8 8 11 4.6-2.2 8-6 8-11V5l-8-3Z"/><path d="M12 7v4M10 11h4l-2 5"/></svg>
+              <span>风控</span>
+            </button>
+            <button class="nav-item" data-section="配置">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v7M4 14v7M12 3v3M12 10v11M20 3v10M20 17v4M1 10h6M9 6h6M17 13h6"/></svg>
+              <span>配置</span>
+            </button>
+          </div>
+          <button class="nav-item system" data-section="系统">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3 10 1h4l1 2 2 .8 2-.8 2 3-1 2 .8 2L23 11v3l-2.2 1-.8 2 1 2-2 3-2-.8-2 .8-1 2h-4l-1-2-2-.8-2 .8-2-3 1-2-.8-2L1 14v-3l2.2-1 .8-2-1-2 2-3 2 .8L9 3Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>系统</span>
+          </button>
+        </aside>
+
+        <main class="terminal">
+          <section class="market-list">
+            <div class="top-tabs">
+              <button class="top-tab active">自选</button>
+              <button class="top-tab">A股</button>
+              <button class="top-tab">港股</button>
+              <button class="top-tab">美股</button>
+              <button class="top-tab">期货</button>
+              <button class="top-tab">持仓</button>
+              <label class="search-box">
+                <input placeholder="标的代码、名称" />
+                <span aria-hidden="true">⌕</span>
+              </label>
+              <span class="tab-spacer"></span>
+              <button class="tool-button" aria-label="设置">⚙</button>
+              <button class="tool-button" aria-label="更多">☰</button>
+            </div>
+            <div class="group-tabs">
+              <button aria-label="列表">☷</button>
+              <button class="active">全部</button>
+              <button>A股</button>
+              <button>美股</button>
+              <button>港股</button>
+              <button>期货</button>
+              <button>111 11</button>
+              <button>sjntest1</button>
+            </div>
+            <div class="quotes-table-wrap">
+              <table class="quotes-table">
+                <thead>
+                  <tr><th>序列</th><th>标的代码</th><th>标的名称</th><th>成交额</th><th>昨收</th><th>今开</th><th>跌停</th></tr>
+                </thead>
+                <tbody id="quote-rows"></tbody>
+              </table>
+              <div class="scrollbar"><span></span></div>
+            </div>
+          </section>
+
+          <aside class="right-panel">
+            <section class="card quote-card">
+              <h2>五档行情</h2>
+              <div class="symbol-line"><strong id="quote-name">平安银行</strong><span id="quote-code">000001.SZ</span><span>⇄</span></div>
+              <div class="headline-price"><strong id="last-price">11.85</strong><span><b>0.15</b><b>1.28%</b></span></div>
+              <div class="quote-stats">
+                <span>最高</span><b class="up">11.86</b><span>最低</span><b class="down">11.66</b>
+                <span>今开</span><b class="down">11.68</b><span>昨收</span><b>11.70</b>
+                <span>涨停</span><b>12.87</b><span>跌停</span><b>10.53</b>
+                <span>总手</span><b>867,632</b><span>总额</span><b>1,022,543,914.24</b>
+                <span>换手</span><b>0.45%</b>
+              </div>
+              <div class="depth-grid">
+                <div class="depth-side buy-depth"><strong>买盘</strong><div id="buy-depth"></div></div>
+                <div class="depth-side sell-depth"><strong>卖盘</strong><div id="sell-depth"></div></div>
+              </div>
+            </section>
+
+            <section class="card order-card">
+              <h2>交易下单</h2>
+              <div class="trade-tabs"><button class="active">普通交易</button><button>空头交易</button></div>
+              <form id="order-form" class="order-form">
+                <label class="order-row"><span>资金账号 <small>CMSHK</small></span><select id="account"><option>001-CNY</option></select></label>
+                <label class="order-row"><span>对冲渠道</span><select id="channel"><option value=""></option><option>DMA-01</option><option>算法路由</option></select></label>
+                <label class="order-row"><span>订单类型</span><select id="order-type"><option value="limit">限价单</option><option value="market">市价单</option></select></label>
+                <label class="order-row"><span>标的代码</span><select id="security"><option value=""></option><option value="000001.SZ" selected>000001.SZ 平安银行</option><option value="600519.SH">600519.SH 贵州茅台</option><option value="430047.BJ">430047.BJ 诺思兰德</option></select></label>
+                <label class="order-row hidden" id="market-type-field"><span>市价类型</span><select id="market-type"><option value="">请选择市价类型</option></select></label>
+                <div class="order-row"><span>订单方向</span><div class="side-switch"><button type="button" class="active buy-side" data-side="buy">买入</button><button type="button" data-side="sell">卖出</button></div></div>
+                <label class="order-row"><span id="price-label">订单价格</span><div class="stepper"><button type="button" data-target="price" data-dir="down">−</button><input id="price" type="number" min="0" step="0.01" value="11.85"/><button type="button" data-target="price" data-dir="up">＋</button></div></label>
+                <p class="price-caption" id="price-caption">等于当前价 <span>0.00%</span></p>
+                <label class="order-row"><span>委托数量</span><div class="stepper"><button type="button" data-target="quantity" data-dir="down">−</button><input id="quantity" type="number" min="0" step="100" value="100"/><button type="button" data-target="quantity" data-dir="up">＋</button></div></label>
+                <p class="quantity-caption">最大可买 <strong>500</strong></p>
+                <div class="fraction-row"><span></span><div><button type="button" data-ratio=".25">1/4</button><button type="button" data-ratio=".333">1/3</button><button type="button" data-ratio=".5">1/2</button><button type="button" data-ratio="1">全仓</button></div></div>
+                <label class="order-row hidden" id="amount-row"><span>参考金额</span><input id="amount" value="1,185.00 CNY" disabled /></label>
+                <label class="order-row"><span>订单模式</span><select id="order-mode"><option value=""></option><option>普通</option><option>对冲</option></select></label>
+                <label class="order-row note-row"><span>备注</span><input id="remark" /></label>
+              </form>
+              <div class="order-footer"><button class="icon-button" aria-label="设置">⚙</button><button class="icon-button" aria-label="刷新">⟳</button><button class="place-order buy" id="place-order">买入</button></div>
+            </section>
+          </aside>
+        </main>
+      </div>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
