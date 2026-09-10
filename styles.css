@@ -313,7 +313,10 @@ select:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px rgb
   right: 16px;
   bottom: auto;
   left: auto;
-  box-shadow: 0 2px 10px rgb(0 0 0 / 22%);
+  border: 1px solid #a72e27;
+  background: #cf3f36;
+  box-shadow: 0 2px 10px rgb(117 20 15 / 35%);
+  font-weight: 600;
   transform: translateX(10px);
 }
 .toast.error.show { transform: translateX(0); }

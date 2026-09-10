@@ -94,7 +94,7 @@ function updateMarketTypeOptions() {
 
   if (!config) {
     select.innerHTML = '<option value="">请选择市价类型</option>';
-    select.disabled = true;
+    select.disabled = false;
   } else {
     select.disabled = false;
     select.innerHTML = '<option value="">请选择市价类型</option>' + config.types
@@ -111,11 +111,14 @@ function updateOrderControls() {
   $('#price-label').textContent = isMarket ? '保护限价' : '价格';
   $('#amount-label').textContent = isMarket ? '参考金额' : '委托金额';
   priceInput.placeholder = isMarket ? '最高买价 / 最低卖价' : '';
-  if (isMarket) {
-    updateMarketTypeOptions();
-    if (!$('#security').value) toast('请先选择证券代码', 'error');
-  }
+  if (isMarket) updateMarketTypeOptions();
   calculateAmount();
+}
+
+function guardMarketTypeSelection(event) {
+  if ($('#security').value) return;
+  event.preventDefault();
+  toast('请先选择证券代码', 'error');
 }
 
 function placeOrder(side) {
@@ -221,11 +224,12 @@ $$('.stepper button').forEach(button => button.addEventListener('click', () => {
 $('#quantity').addEventListener('input', calculateAmount);
 $('#price').addEventListener('input', calculateAmount);
 $('#order-type').addEventListener('change', updateOrderControls);
+$('#market-type').addEventListener('pointerdown', guardMarketTypeSelection);
+$('#market-type').addEventListener('keydown', event => {
+  if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) guardMarketTypeSelection(event);
+});
 $('#security').addEventListener('change', () => {
-  if ($('#order-type').value === 'market') {
-    updateMarketTypeOptions();
-    if (!$('#security').value) toast('请先选择证券代码', 'error');
-  }
+  if ($('#order-type').value === 'market') updateMarketTypeOptions();
 });
 $$('.submit').forEach(button => button.addEventListener('click', () => placeOrder(button.dataset.side)));
 
