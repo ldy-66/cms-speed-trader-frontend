@@ -96,10 +96,19 @@ function updateOrderType() {
   updateAmount();
 }
 
+function setSecurityError(hasError) {
+  const security = $('#security');
+  security.classList.toggle('field-error', hasError);
+  security.setAttribute('aria-invalid', hasError ? 'true' : 'false');
+}
+
 function guardMarketType(event) {
-  if ($('#security').value) return;
+  if ($('#security').value) {
+    setSecurityError(false);
+    return;
+  }
   event.preventDefault();
-  toast('请先选择标的代码');
+  setSecurityError(true);
 }
 
 function setSide(side) {
@@ -115,7 +124,11 @@ function placeOrder() {
   const quantity = Number($('#quantity').value || 0);
   const price = Number($('#price').value || 0);
   const isMarket = $('#order-type').value === 'market';
-  if (!security) return toast('请先选择标的代码');
+  if (!security) {
+    setSecurityError(true);
+    return;
+  }
+  setSecurityError(false);
   if (isMarket && !$('#market-type').value) return toast('请选择市价类型');
   if (price <= 0) return toast(isMarket ? '请输入有效保护限价' : '请输入有效订单价格');
   if (quantity <= 0) return toast('请输入有效委托数量');
@@ -173,6 +186,7 @@ $$('.fraction-row button').forEach(button => button.addEventListener('click', ()
 
 $('#order-type').addEventListener('change', updateOrderType);
 $('#security').addEventListener('change', () => {
+  if ($('#security').value) setSecurityError(false);
   if ($('#order-type').value === 'market') updateMarketTypes();
 });
 $('#market-type').addEventListener('pointerdown', guardMarketType);

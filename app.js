@@ -115,10 +115,19 @@ function updateOrderControls() {
   calculateAmount();
 }
 
+function setSecurityError(hasError) {
+  const security = $('#security');
+  security.classList.toggle('field-error', hasError);
+  security.setAttribute('aria-invalid', hasError ? 'true' : 'false');
+}
+
 function guardMarketTypeSelection(event) {
-  if ($('#security').value) return;
+  if ($('#security').value) {
+    setSecurityError(false);
+    return;
+  }
   event.preventDefault();
-  toast('请先选择证券代码', 'error');
+  setSecurityError(true);
 }
 
 function placeOrder(side) {
@@ -128,7 +137,11 @@ function placeOrder(side) {
   const marketType = $('#market-type').value;
   const marketTypeLabel = $('#market-type').selectedOptions[0]?.textContent || '';
   const orderType = isMarket ? `Market · ${marketTypeLabel}` : 'Limit';
-  if (!security) return toast('请先选择证券代码', 'error');
+  if (!security) {
+    setSecurityError(true);
+    return;
+  }
+  setSecurityError(false);
   if (quantity <= 0) return toast('请输入有效数量', 'error');
   if (isMarket && !marketType) return toast('请选择市价类型', 'error');
   if (Number($('#price').value || 0) <= 0) return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
@@ -229,6 +242,7 @@ $('#market-type').addEventListener('keydown', event => {
   if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) guardMarketTypeSelection(event);
 });
 $('#security').addEventListener('change', () => {
+  if ($('#security').value) setSecurityError(false);
   if ($('#order-type').value === 'market') updateMarketTypeOptions();
 });
 $$('.submit').forEach(button => button.addEventListener('click', () => placeOrder(button.dataset.side)));

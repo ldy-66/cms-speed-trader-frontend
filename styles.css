@@ -180,6 +180,8 @@ select, input {
   padding: 2px 5px;
 }
 select:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px rgb(22 138 210 / 12%); }
+#security.field-error,
+#security.field-error:focus { border-color: #d83a34; box-shadow: 0 0 0 1px rgb(216 58 52 / 24%); }
 .filter-grid select { height: 31px; color: var(--muted); text-align: right; }
 .filter-grid select:valid { color: #111; }
 
