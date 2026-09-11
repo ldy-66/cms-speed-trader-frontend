@@ -79,6 +79,10 @@ function updateMarketTypes() {
 }
 
 function updateAmount() {
+  if ($('#order-type').value === 'market') {
+    $('#amount').value = '';
+    return;
+  }
   const quantity = Number($('#quantity').value || 0);
   const price = Number($('#price').value || 0);
   $('#amount').value = quantity > 0 && price > 0
@@ -89,7 +93,7 @@ function updateAmount() {
 function updateOrderType() {
   const isMarket = $('#order-type').value === 'market';
   $('#market-type-field').classList.toggle('hidden', !isMarket);
-  $('#amount-row').classList.toggle('hidden', !isMarket);
+  $('#amount-row').classList.add('hidden');
   $('#price-label').textContent = isMarket ? '保护限价' : '订单价格';
   $('#price-caption').innerHTML = isMarket ? '买入最高价 / 卖出最低价' : '等于当前价 <span>0.00%</span>';
   if (isMarket) updateMarketTypes();

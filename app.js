@@ -72,12 +72,16 @@ function renderOrderBook() {
 }
 
 function calculateAmount() {
+  if ($('#order-type').value === 'market') {
+    $('#amount').value = '';
+    return;
+  }
   const quantity = Number($('#quantity').value || 0);
   const price = Number($('#price').value || 0);
   const value = quantity > 0 && price > 0
     ? (quantity * price).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : '';
-  $('#amount').value = value ? `${$('#order-type').value === 'market' ? '参考 ' : ''}${value}` : '-';
+  $('#amount').value = value || '-';
 }
 
 function securityMarket(code) {
@@ -108,8 +112,8 @@ function updateOrderControls() {
   const isMarket = $('#order-type').value === 'market';
   const priceInput = $('#price');
   $('#market-type-field').classList.toggle('hidden', !isMarket);
+  $('#amount-row').classList.toggle('hidden', isMarket);
   $('#price-label').textContent = isMarket ? '保护限价' : '价格';
-  $('#amount-label').textContent = isMarket ? '参考金额' : '委托金额';
   priceInput.placeholder = isMarket ? '最高买价 / 最低卖价' : '';
   if (isMarket) updateMarketTypeOptions();
   calculateAmount();
