@@ -146,7 +146,7 @@ function openConfirmation() {
   const channel = selectedText('#channel');
 
   $('#confirm-account').textContent = selectedText('#account');
-  $('#confirm-channel').textContent = channel === '-' ? '智能路由' : channel;
+  $('#confirm-channel').textContent = channel === '-' ? '' : channel;
   $('#confirm-order-type').textContent = isMarket ? '市价单' : '限价单';
   $('#confirm-market-type').textContent = isMarket ? selectedText('#market-type') : '-';
   $('.market-confirm-row').classList.toggle('hidden', !isMarket);
