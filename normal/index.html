@@ -129,7 +129,7 @@
                 <p class="quantity-caption">最大可买 <strong>500</strong></p>
                 <div class="fraction-row"><span></span><div><button type="button" data-ratio=".25">1/4</button><button type="button" data-ratio=".333">1/3</button><button type="button" data-ratio=".5">1/2</button><button type="button" data-ratio="1">全仓</button></div></div>
                 <label class="order-row hidden" id="amount-row"><span>参考金额</span><input id="amount" value="1,185.00 CNY" disabled /></label>
-                <label class="order-row"><span>订单模式</span><select id="order-mode"><option value=""></option><option>普通</option><option>对冲</option></select></label>
+                <label class="order-row"><span>订单模式</span><select id="order-mode"><option>普通</option><option>HighTouch</option><option>对冲</option></select></label>
                 <label class="order-row note-row"><span>备注</span><input id="remark" /></label>
               </form>
               <div class="order-footer"><button class="icon-button" aria-label="设置">⚙</button><button class="icon-button" aria-label="刷新">⟳</button><button class="place-order buy" id="place-order">买入</button></div>
@@ -139,6 +139,37 @@
       </div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="confirm-backdrop hidden" id="confirm-backdrop" role="presentation">
+      <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <header class="confirm-header">
+          <h2 id="confirm-title">下单确认</h2>
+          <button type="button" id="confirm-close" aria-label="关闭">×</button>
+        </header>
+        <div class="confirm-body">
+          <div class="confirm-warning hidden" id="quantity-warning"></div>
+          <div class="confirm-warning" id="market-warning">
+            <span aria-hidden="true">△</span>
+            <p>市价单成交价格存在不确定性。保护限价仅限制可接受的价格边界，实际成交价格和成交数量以柜台回报为准。</p>
+          </div>
+          <dl class="confirm-details">
+            <div><dt>业务类型</dt><dd>普通交易</dd></div>
+            <div><dt>资金账号</dt><dd id="confirm-account"></dd></div>
+            <div><dt>对冲渠道</dt><dd id="confirm-channel"></dd></div>
+            <div><dt>订单类型</dt><dd id="confirm-order-type"></dd></div>
+            <div class="market-confirm-row"><dt>市价类型</dt><dd id="confirm-market-type"></dd></div>
+            <div><dt>标的代码</dt><dd id="confirm-security"></dd></div>
+            <div><dt>订单方向</dt><dd id="confirm-side" class="confirm-side"></dd></div>
+            <div><dt>订单模式</dt><dd id="confirm-mode"></dd></div>
+            <div><dt>备注</dt><dd id="confirm-remark"></dd></div>
+          </dl>
+          <div class="confirm-values" id="confirm-values"></div>
+        </div>
+        <footer class="confirm-actions">
+          <button type="button" class="cancel" id="confirm-cancel">取消</button>
+          <button type="button" class="submit buy" id="confirm-submit">买入</button>
+        </footer>
+      </section>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>

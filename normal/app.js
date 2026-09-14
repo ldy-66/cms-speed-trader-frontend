@@ -123,6 +123,55 @@ function setSide(side) {
   submit.dataset.side = side;
 }
 
+function selectedText(selector) {
+  const select = $(selector);
+  return select.options[select.selectedIndex]?.textContent.trim() || '-';
+}
+
+function money(value) {
+  return Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function closeConfirmation() {
+  $('#confirm-backdrop').classList.add('hidden');
+}
+
+function openConfirmation() {
+  const isMarket = $('#order-type').value === 'market';
+  const side = $('#place-order').dataset.side === 'sell' ? '卖出' : '买入';
+  const quantity = Number($('#quantity').value || 0);
+  const price = Number($('#price').value || 0);
+  const code = $('#security').value;
+  const name = selectedText('#security').replace(code, '').trim();
+  const channel = selectedText('#channel');
+
+  $('#confirm-account').textContent = selectedText('#account');
+  $('#confirm-channel').textContent = channel === '-' ? '智能路由' : channel;
+  $('#confirm-order-type').textContent = isMarket ? '市价单' : '限价单';
+  $('#confirm-market-type').textContent = isMarket ? selectedText('#market-type') : '-';
+  $('.market-confirm-row').classList.toggle('hidden', !isMarket);
+  $('#confirm-security').textContent = `${name}（${code}）`;
+  $('#confirm-side').textContent = side;
+  $('#confirm-side').className = `confirm-side ${side === '买入' ? 'buy' : 'sell'}`;
+  $('#confirm-mode').textContent = selectedText('#order-mode');
+  $('#confirm-remark').textContent = $('#remark').value.trim() || '-';
+  $('#market-warning').classList.toggle('hidden', !isMarket);
+
+  const quantityWarning = $('#quantity-warning');
+  quantityWarning.classList.toggle('hidden', quantity <= 500);
+  quantityWarning.innerHTML = `<span aria-hidden="true">△</span><p>您输入的委托数量${quantity}大于最大可买500。</p>`;
+
+  $('#confirm-values').innerHTML = isMarket
+    ? `<div><span>保护限价</span><strong>${money(price)}</strong></div><div><span>数量</span><strong>${quantity}</strong></div>`
+    : `<div><span>价格</span><strong>${money(price)}</strong></div><div><span>数量</span><strong>${quantity}</strong></div><div><span>委托金额</span><strong>CNY ${money(quantity * price)}</strong></div>`;
+
+  const submit = $('#confirm-submit');
+  submit.textContent = side;
+  submit.className = `submit ${side === '买入' ? 'buy' : 'sell'}`;
+  $('#confirm-backdrop').classList.remove('hidden');
+  submit.focus();
+}
+
 function placeOrder() {
   const security = $('#security').value;
   const quantity = Number($('#quantity').value || 0);
@@ -136,8 +185,7 @@ function placeOrder() {
   if (isMarket && !$('#market-type').value) return toast('请选择市价类型');
   if (price <= 0) return toast(isMarket ? '请输入有效保护限价' : '请输入有效订单价格');
   if (quantity <= 0) return toast('请输入有效委托数量');
-  const side = $('#place-order').dataset.side === 'sell' ? '卖出' : '买入';
-  toast(`${side}委托已提交（演示）`, 'info');
+  openConfirmation();
 }
 
 renderQuotes();
@@ -200,3 +248,16 @@ $('#market-type').addEventListener('keydown', event => {
 $('#price').addEventListener('input', updateAmount);
 $('#quantity').addEventListener('input', updateAmount);
 $('#place-order').addEventListener('click', placeOrder);
+$('#confirm-close').addEventListener('click', closeConfirmation);
+$('#confirm-cancel').addEventListener('click', closeConfirmation);
+$('#confirm-backdrop').addEventListener('click', event => {
+  if (event.target === $('#confirm-backdrop')) closeConfirmation();
+});
+$('#confirm-submit').addEventListener('click', () => {
+  const side = $('#confirm-submit').textContent;
+  closeConfirmation();
+  toast(`${side}委托已提交（演示）`, 'info');
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeConfirmation();
+});
