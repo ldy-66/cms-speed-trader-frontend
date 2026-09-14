@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 前端复刻</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260914" />
   </head>
   <body>
     <div class="app-shell">
@@ -120,34 +120,22 @@
               <form class="manual-body" id="manual-body">
                 <span class="trade-tag">普通交易</span>
                 <div class="form-grid">
-                  <div class="form-row">
-                    <label class="field"><span>资金账号 <small>110010001</small></span><select id="account"><option>11001000101-CNY</option></select></label>
-                    <label class="field"><span>对冲渠道</span><select id="channel"><option value=""></option><option>DMA-01</option><option>算法路由</option></select></label>
-                  </div>
-                  <div class="form-row">
-                    <label class="field"><span>框架名称</span><select id="framework"><option>10001_CNY_QFII</option><option>10002_CNY_SWAP</option></select></label>
-                    <label class="field"><span>证券代码</span><select id="security"><option value=""></option><option value="600519">600519 贵州茅台</option><option value="000001">000001 平安银行</option><option value="510300">510300 沪深300ETF</option></select></label>
-                  </div>
-                  <div class="form-row order-type-row">
-                    <label class="field"><span>订单类型</span><select id="order-type"><option value="limit">Limit</option><option value="market">Market</option></select></label>
-                    <label class="field market-type-field hidden" id="market-type-field">
-                      <span>市价类型</span>
-                      <select id="market-type" disabled><option value="">请选择市价类型</option></select>
-                    </label>
-                  </div>
-                  <div class="form-row key-order-row">
-                    <label class="field numeric-field"><span>数量</span><div class="stepper"><input id="quantity" type="number" min="0" step="100" value="0"/><button type="button" data-step="quantity" data-dir="up">＋</button><button type="button" data-step="quantity" data-dir="down">－</button></div></label>
-                    <label class="field numeric-field" id="price-field"><span id="price-label">价格</span><div class="stepper"><input id="price" type="number" min="0" step="0.01" placeholder=""/><button type="button" data-step="price" data-dir="up">＋</button><button type="button" data-step="price" data-dir="down">－</button></div></label>
-                  </div>
-                  <div class="form-row" id="amount-row">
-                    <label class="field"><span>币种</span><input value="CNY" disabled /></label>
-                    <label class="field"><span id="amount-label">委托金额</span><input id="amount" value="-" disabled /></label>
-                  </div>
-                  <div class="form-row">
-                    <label class="field"><span>算法类型</span><select id="algo"><option>None</option><option>TWAP</option><option>VWAP</option></select></label>
-                    <label class="field"><span>订单模式</span><select id="order-mode"><option value=""></option><option>普通</option><option>对冲</option></select></label>
-                  </div>
-                  <label class="field wide note-field"><span>备注</span><input id="remark" /></label>
+                  <label class="field"><span>资金账号 <small>110010001</small></span><select id="account"><option>11001000101-CNY</option></select></label>
+                  <label class="field"><span>对冲渠道</span><select id="channel"><option value=""></option><option>DMA-01</option><option>算法路由</option></select></label>
+                  <label class="field"><span>框架名称</span><select id="framework"><option>10001_CNY_QFII</option><option>10002_CNY_SWAP</option></select></label>
+                  <label class="field"><span>证券代码</span><select id="security"><option value=""></option><option value="600519">600519 贵州茅台</option><option value="000001">000001 平安银行</option><option value="510300">510300 沪深300ETF</option></select></label>
+                  <label class="field"><span>订单类型</span><select id="order-type"><option value="limit">Limit</option><option value="market">Market</option></select></label>
+                  <label class="field market-type-field hidden" id="market-type-field">
+                    <span>市价类型</span>
+                    <select id="market-type" disabled><option value="">请选择市价类型</option></select>
+                  </label>
+                  <label class="field numeric-field"><span>数量</span><div class="stepper"><input id="quantity" type="number" min="0" step="100" value="0"/><button type="button" data-step="quantity" data-dir="up">＋</button><button type="button" data-step="quantity" data-dir="down">－</button></div></label>
+                  <label class="field numeric-field" id="price-field"><span id="price-label">价格</span><div class="stepper"><input id="price" type="number" min="0" step="0.01" placeholder=""/><button type="button" data-step="price" data-dir="up">＋</button><button type="button" data-step="price" data-dir="down">－</button></div></label>
+                  <label class="field" id="currency-field"><span>币种</span><input value="CNY" disabled /></label>
+                  <label class="field" id="amount-field"><span id="amount-label">委托金额</span><input id="amount" value="-" disabled /></label>
+                  <label class="field"><span>算法类型</span><select id="algo"><option>None</option><option>TWAP</option><option>VWAP</option></select></label>
+                  <label class="field"><span>订单模式</span><select id="order-mode"><option value=""></option><option>普通</option><option>对冲</option></select></label>
+                  <label class="field note-field"><span>备注</span><input id="remark" /></label>
                 </div>
                 <div class="submit-row">
                   <button type="button" class="submit buy" data-side="Buy">Buy</button>
@@ -160,6 +148,6 @@
       </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
-    <script src="app.js"></script>
+    <script src="app.js?v=20260914"></script>
   </body>
 </html>

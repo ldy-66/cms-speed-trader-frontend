@@ -10,9 +10,11 @@ const state = {
   })),
 };
 
-// 交易所支持项应最终由后端/柜台配置返回；这里用于前端原型演示。
-const marketTypeConfig = {
+// 原型通过本地数据模拟后端返回；生产前端不保存市价类型和保护限价规则。
+const marketTypeLicenseEnabled = new URLSearchParams(window.location.search).get('marketTypeLicense') !== 'off';
+const demoBackendOrderEntryConfig = {
   SH: {
+    protectionLimit: { visible: true, required: true },
     types: [
       { value: 'five-ioc', label: '最优五档即时成交剩余撤销' },
       { value: 'five-limit', label: '最优五档即时成交剩余转限价' },
@@ -21,6 +23,7 @@ const marketTypeConfig = {
     ],
   },
   SZ: {
+    protectionLimit: { visible: false, required: false },
     types: [
       { value: 'counterparty', label: '对手方最优价格' },
       { value: 'own-best', label: '本方最优价格' },
@@ -29,7 +32,18 @@ const marketTypeConfig = {
       { value: 'fok', label: '全额成交或撤销（FOK）' },
     ],
   },
+  BJ: {
+    protectionLimit: { visible: true, required: true },
+    types: [
+      { value: 'counterparty', label: '对手方最优价格' },
+      { value: 'own-best', label: '本方最优价格' },
+      { value: 'five-ioc', label: '最优五档即时成交剩余撤销' },
+      { value: 'five-limit', label: '最优五档即时成交剩余转限价' },
+    ],
+  },
 };
+
+let activeOrderEntryConfig = null;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -90,13 +104,16 @@ function securityMarket(code) {
   return '';
 }
 
-function updateMarketTypeOptions() {
+function requestOrderEntryConfig(code) {
+  const config = demoBackendOrderEntryConfig[securityMarket(code)];
+  return Promise.resolve(config || { protectionLimit: { visible: false, required: false }, types: [] });
+}
+
+function updateMarketTypeOptions(config) {
   const select = $('#market-type');
-  const market = securityMarket($('#security').value);
-  const config = marketTypeConfig[market];
   const previous = select.value;
 
-  if (!config) {
+  if (!config?.types.length) {
     select.innerHTML = '<option value="">请选择市价类型</option>';
     select.disabled = false;
   } else {
@@ -108,17 +125,27 @@ function updateMarketTypeOptions() {
   }
 }
 
-function updateOrderControls() {
+async function updateOrderControls() {
   const isMarket = $('#order-type').value === 'market';
-  const isShenzhenMarketOrder = isMarket && securityMarket($('#security').value) === 'SZ';
   const priceInput = $('#price');
-  $('#market-type-field').classList.toggle('hidden', !isMarket);
-  $('#amount-row').classList.toggle('hidden', isMarket);
-  $('#price-field').classList.toggle('hidden', isShenzhenMarketOrder);
+  $('#market-type-field').classList.toggle('hidden', !isMarket || !marketTypeLicenseEnabled);
+  $('#amount-field').classList.toggle('hidden', isMarket);
   $('#price-label').textContent = isMarket ? '保护限价' : '价格';
   priceInput.placeholder = isMarket ? '最高买价 / 最低卖价' : '';
-  if (isShenzhenMarketOrder) priceInput.value = '';
-  if (isMarket) updateMarketTypeOptions();
+
+  if (!isMarket) {
+    activeOrderEntryConfig = null;
+    $('#price-field').classList.remove('hidden');
+    $('#market-type').value = '';
+    calculateAmount();
+    return;
+  }
+
+  activeOrderEntryConfig = await requestOrderEntryConfig($('#security').value);
+  const showProtectionLimit = activeOrderEntryConfig.protectionLimit.visible;
+  $('#price-field').classList.toggle('hidden', !showProtectionLimit);
+  if (!showProtectionLimit) priceInput.value = '';
+  if (marketTypeLicenseEnabled) updateMarketTypeOptions(activeOrderEntryConfig);
   calculateAmount();
 }
 
@@ -143,15 +170,15 @@ function placeOrder(side) {
   const isMarket = $('#order-type').value === 'market';
   const marketType = $('#market-type').value;
   const marketTypeLabel = $('#market-type').selectedOptions[0]?.textContent || '';
-  const orderType = isMarket ? `Market · ${marketTypeLabel}` : 'Limit';
+  const orderType = isMarket && marketTypeLabel && marketTypeLicenseEnabled ? `Market · ${marketTypeLabel}` : (isMarket ? 'Market' : 'Limit');
   if (!security) {
     setSecurityError(true);
     return;
   }
   setSecurityError(false);
   if (quantity <= 0) return toast('请输入有效数量', 'error');
-  if (isMarket && !marketType) return toast('请选择市价类型', 'error');
-  const requiresProtectionPrice = isMarket && securityMarket(security) !== 'SZ';
+  if (isMarket && marketTypeLicenseEnabled && !marketType) return toast('请选择市价类型', 'error');
+  const requiresProtectionPrice = isMarket && activeOrderEntryConfig?.protectionLimit.required;
   if ((!isMarket || requiresProtectionPrice) && Number($('#price').value || 0) <= 0) {
     return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
   }
@@ -159,7 +186,7 @@ function placeOrder(side) {
   const entrustBody = $('#entrust-rows');
   const tr = document.createElement('tr');
   const id = `WT${Date.now().toString().slice(-8)}`;
-  tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${security}</td><td>${$('#security').selectedOptions[0].textContent.replace(security, '').trim()}</td><td>${isMarket ? 'Market' : 'Limit'}</td><td>${isMarket ? marketTypeLabel : '—'}</td><td>${side}</td>`;
+  tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${security}</td><td>${$('#security').selectedOptions[0].textContent.replace(security, '').trim()}</td><td>${isMarket ? 'Market' : 'Limit'}</td><td>${isMarket && marketTypeLicenseEnabled ? marketTypeLabel : '—'}</td><td>${side}</td>`;
   entrustBody.prepend(tr);
   toast(`${side === 'Buy' ? '买入' : '卖出'} ${orderType} 委托已加入列表（演示数据）`);
 }

@@ -272,15 +272,12 @@ select:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px rgb
 }
 .manual-body { min-height: 0; flex: 1; display: flex; flex-direction: column; padding: 7px 5px 0; overflow: hidden; }
 .trade-tag { align-self: flex-start; margin: 0 0 8px 1px; padding: 4px 7px; color: #001522; background: #168bd3; }
-.form-grid { min-height: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding: 0 3px 3px 0; }
-.form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 20px; }
+.form-grid { min-height: 0; flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: min-content; gap: 6px 20px; align-content: start; overflow-y: auto; padding: 0 3px 3px 0; }
 .field { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .field > span { height: 14px; font-size: 13px; }
 .field small { font-size: 10px; color: #4b5860; font-weight: 400; }
 .field input, .field select { height: 27px; }
 .field input:disabled { color: #999; background: #fff; }
-.field.wide { width: 100%; }
-.key-order-row { padding-top: 1px; }
 .note-field { margin-top: 1px; }
 .numeric-field > span { font-size: 16px; font-weight: 700; }
 .stepper { display: grid; grid-template-columns: 1fr 27px 27px; }
