@@ -110,11 +110,14 @@ function updateMarketTypeOptions() {
 
 function updateOrderControls() {
   const isMarket = $('#order-type').value === 'market';
+  const isShenzhenMarketOrder = isMarket && securityMarket($('#security').value) === 'SZ';
   const priceInput = $('#price');
   $('#market-type-field').classList.toggle('hidden', !isMarket);
   $('#amount-row').classList.toggle('hidden', isMarket);
+  $('#price-field').classList.toggle('hidden', isShenzhenMarketOrder);
   $('#price-label').textContent = isMarket ? '保护限价' : '价格';
   priceInput.placeholder = isMarket ? '最高买价 / 最低卖价' : '';
+  if (isShenzhenMarketOrder) priceInput.value = '';
   if (isMarket) updateMarketTypeOptions();
   calculateAmount();
 }
@@ -148,7 +151,10 @@ function placeOrder(side) {
   setSecurityError(false);
   if (quantity <= 0) return toast('请输入有效数量', 'error');
   if (isMarket && !marketType) return toast('请选择市价类型', 'error');
-  if (Number($('#price').value || 0) <= 0) return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
+  const requiresProtectionPrice = isMarket && securityMarket(security) !== 'SZ';
+  if ((!isMarket || requiresProtectionPrice) && Number($('#price').value || 0) <= 0) {
+    return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
+  }
 
   const entrustBody = $('#entrust-rows');
   const tr = document.createElement('tr');
@@ -247,7 +253,7 @@ $('#market-type').addEventListener('keydown', event => {
 });
 $('#security').addEventListener('change', () => {
   if ($('#security').value) setSecurityError(false);
-  if ($('#order-type').value === 'market') updateMarketTypeOptions();
+  if ($('#order-type').value === 'market') updateOrderControls();
 });
 $$('.submit').forEach(button => button.addEventListener('click', () => placeOrder(button.dataset.side)));
 

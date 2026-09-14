@@ -92,10 +92,14 @@ function updateAmount() {
 
 function updateOrderType() {
   const isMarket = $('#order-type').value === 'market';
+  const isShenzhenMarketOrder = isMarket && securityMarket($('#security').value) === 'SZ';
   $('#market-type-field').classList.toggle('hidden', !isMarket);
   $('#amount-row').classList.add('hidden');
+  $('#price-field').classList.toggle('hidden', isShenzhenMarketOrder);
+  $('#price-caption').classList.toggle('hidden', isShenzhenMarketOrder);
   $('#price-label').textContent = isMarket ? '保护限价' : '订单价格';
   $('#price-caption').innerHTML = isMarket ? '买入最高价 / 卖出最低价' : '等于当前价 <span>0.00%</span>';
+  if (isShenzhenMarketOrder) $('#price').value = '';
   if (isMarket) updateMarketTypes();
   updateAmount();
 }
@@ -142,6 +146,7 @@ function openConfirmation() {
   const quantity = Number($('#quantity').value || 0);
   const price = Number($('#price').value || 0);
   const code = $('#security').value;
+  const isShenzhenMarketOrder = isMarket && securityMarket(code) === 'SZ';
   const name = selectedText('#security').replace(code, '').trim();
   const channel = selectedText('#channel');
 
@@ -156,13 +161,16 @@ function openConfirmation() {
   $('#confirm-mode').textContent = selectedText('#order-mode');
   $('#confirm-remark').textContent = $('#remark').value.trim() || '-';
   $('#market-warning').classList.toggle('hidden', !isMarket);
+  $('#market-warning p').textContent = isShenzhenMarketOrder
+    ? '市价单成交价格存在不确定性，实际成交价格和成交数量以柜台回报为准。'
+    : '市价单成交价格存在不确定性。保护限价仅限制可接受的价格边界，实际成交价格和成交数量以柜台回报为准。';
 
   const quantityWarning = $('#quantity-warning');
   quantityWarning.classList.toggle('hidden', quantity <= 500);
   quantityWarning.innerHTML = `<span aria-hidden="true">△</span><p>您输入的委托数量${quantity}大于最大可买500。</p>`;
 
   $('#confirm-values').innerHTML = isMarket
-    ? `<div><span>保护限价</span><strong>${money(price)}</strong></div><div><span>数量</span><strong>${quantity}</strong></div>`
+    ? `${isShenzhenMarketOrder ? '' : `<div><span>保护限价</span><strong>${money(price)}</strong></div>`}<div><span>数量</span><strong>${quantity}</strong></div>`
     : `<div><span>价格</span><strong>${money(price)}</strong></div><div><span>数量</span><strong>${quantity}</strong></div><div><span>委托金额</span><strong>CNY ${money(quantity * price)}</strong></div>`;
 
   const submit = $('#confirm-submit');
@@ -183,7 +191,10 @@ function placeOrder() {
   }
   setSecurityError(false);
   if (isMarket && !$('#market-type').value) return toast('请选择市价类型');
-  if (price <= 0) return toast(isMarket ? '请输入有效保护限价' : '请输入有效订单价格');
+  const requiresProtectionPrice = isMarket && securityMarket(security) !== 'SZ';
+  if ((!isMarket || requiresProtectionPrice) && price <= 0) {
+    return toast(isMarket ? '请输入有效保护限价' : '请输入有效订单价格');
+  }
   if (quantity <= 0) return toast('请输入有效委托数量');
   openConfirmation();
 }
@@ -239,7 +250,7 @@ $$('.fraction-row button').forEach(button => button.addEventListener('click', ()
 $('#order-type').addEventListener('change', updateOrderType);
 $('#security').addEventListener('change', () => {
   if ($('#security').value) setSecurityError(false);
-  if ($('#order-type').value === 'market') updateMarketTypes();
+  if ($('#order-type').value === 'market') updateOrderType();
 });
 $('#market-type').addEventListener('pointerdown', guardMarketType);
 $('#market-type').addEventListener('keydown', event => {
