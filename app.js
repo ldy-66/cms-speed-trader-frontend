@@ -137,14 +137,20 @@ async function updateOrderControls() {
     activeOrderEntryConfig = null;
     $('#price-field').classList.remove('hidden');
     $('#market-type').value = '';
+    priceInput.required = true;
+    priceInput.setAttribute('aria-required', 'true');
     calculateAmount();
     return;
   }
 
+  priceInput.value = '';
   activeOrderEntryConfig = await requestOrderEntryConfig($('#security').value);
   const showProtectionLimit = activeOrderEntryConfig.protectionLimit.visible;
+  const requiresProtectionLimit = showProtectionLimit && activeOrderEntryConfig.protectionLimit.required;
   $('#price-field').classList.toggle('hidden', !showProtectionLimit);
   if (!showProtectionLimit) priceInput.value = '';
+  priceInput.required = requiresProtectionLimit;
+  priceInput.setAttribute('aria-required', requiresProtectionLimit ? 'true' : 'false');
   if (marketTypeLicenseEnabled) updateMarketTypeOptions(activeOrderEntryConfig);
   calculateAmount();
 }
@@ -273,10 +279,16 @@ $$('.stepper button').forEach(button => button.addEventListener('click', () => {
 
 $('#quantity').addEventListener('input', calculateAmount);
 $('#price').addEventListener('input', calculateAmount);
-$('#order-type').addEventListener('change', updateOrderControls);
+$('#order-type').addEventListener('change', () => {
+  $('#price').value = '';
+  updateOrderControls();
+});
 $('#market-type').addEventListener('pointerdown', guardMarketTypeSelection);
 $('#market-type').addEventListener('keydown', event => {
   if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) guardMarketTypeSelection(event);
+});
+$('#market-type').addEventListener('change', () => {
+  if ($('#order-type').value === 'market') $('#price').value = '';
 });
 $('#security').addEventListener('change', () => {
   if ($('#security').value) setSecurityError(false);

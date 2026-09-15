@@ -120,15 +120,21 @@ async function updateOrderType() {
     $('#price-field').classList.remove('hidden');
     $('#price-caption').classList.remove('hidden');
     $('#market-type').value = '';
+    $('#price').required = true;
+    $('#price').setAttribute('aria-required', 'true');
     updateAmount();
     return;
   }
 
+  $('#price').value = '';
   activeOrderEntryConfig = await requestOrderEntryConfig($('#security').value);
   const showProtectionLimit = activeOrderEntryConfig.protectionLimit.visible;
+  const requiresProtectionLimit = showProtectionLimit && activeOrderEntryConfig.protectionLimit.required;
   $('#price-field').classList.toggle('hidden', !showProtectionLimit);
   $('#price-caption').classList.toggle('hidden', !showProtectionLimit);
   if (!showProtectionLimit) $('#price').value = '';
+  $('#price').required = requiresProtectionLimit;
+  $('#price').setAttribute('aria-required', requiresProtectionLimit ? 'true' : 'false');
   if (marketTypeLicenseEnabled) updateMarketTypes(activeOrderEntryConfig);
   updateAmount();
 }
@@ -154,6 +160,7 @@ function setSide(side) {
   submit.textContent = side === 'buy' ? '买入' : '卖出';
   submit.className = `place-order ${side}`;
   submit.dataset.side = side;
+  if ($('#order-type').value === 'market') $('#price').value = '';
 }
 
 function selectedText(selector) {
@@ -276,7 +283,10 @@ $$('.fraction-row button').forEach(button => button.addEventListener('click', ()
   updateAmount();
 }));
 
-$('#order-type').addEventListener('change', updateOrderType);
+$('#order-type').addEventListener('change', () => {
+  $('#price').value = '';
+  updateOrderType();
+});
 $('#security').addEventListener('change', () => {
   if ($('#security').value) setSecurityError(false);
   if ($('#order-type').value === 'market') updateOrderType();
@@ -284,6 +294,9 @@ $('#security').addEventListener('change', () => {
 $('#market-type').addEventListener('pointerdown', guardMarketType);
 $('#market-type').addEventListener('keydown', event => {
   if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) guardMarketType(event);
+});
+$('#market-type').addEventListener('change', () => {
+  if ($('#order-type').value === 'market') $('#price').value = '';
 });
 $('#price').addEventListener('input', updateAmount);
 $('#quantity').addEventListener('input', updateAmount);
