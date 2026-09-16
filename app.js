@@ -213,9 +213,7 @@ function openOrderConfirmation(snapshot) {
 
   const risk = $('#market-risk');
   risk.classList.toggle('hidden', !snapshot.isMarket);
-  risk.textContent = snapshot.protectionLimitVisible
-    ? '市价单实际成交价格和成交数量存在不确定性。保护限价用于限制可以接受的成交价格范围。'
-    : '市价单实际成交价格和成交数量存在不确定性，请确认订单信息后再提交。';
+  risk.textContent = '市价单实际成交价格和成交数量存在不确定性，请确认订单信息后再提交。';
 
   addConfirmDetail('合约编号', snapshot.security);
   addConfirmDetail('合约名称', snapshot.securityName);
