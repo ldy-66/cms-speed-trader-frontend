@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 普通版</title>
-    <link rel="stylesheet" href="styles.css?v=20260916b" />
+    <link rel="stylesheet" href="styles.css?v=20260916c" />
   </head>
   <body>
     <div class="app-shell">
@@ -169,7 +169,7 @@
                 </thead>
                 <tbody id="orders-list-body">
                   <tr><td>1</td><td><button>修改</button></td><td class="sell-text">卖出</td><td>已成</td><td>普通交易</td><td>80882048购买力账号</td><td>限价单</td><td></td><td>600009</td><td>上海机场</td><td>22.85</td><td></td><td>10,000</td><td>LowTouch</td><td></td></tr>
-                  <tr><td>2</td><td><button>直接下单</button><button>拆单</button></td><td class="buy-text">买入</td><td class="pending-status">待报</td><td>普通交易</td><td>牛定于购买力账号</td><td>市价单</td><td>即时成交剩余撤销</td><td>000001</td><td>平安银行</td><td>市价</td><td></td><td>600</td><td>HighTouch</td><td></td></tr>
+                  <tr id="hightouch-order-row"><td>2</td><td id="hightouch-actions"><button data-ht-action="accept">确认</button><button data-ht-action="cancel">撤单</button></td><td class="buy-text">买入</td><td class="pending-status">待报</td><td>普通交易</td><td>牛定于购买力账号</td><td>市价单</td><td>即时成交剩余撤销</td><td>000001</td><td>平安银行</td><td>市价</td><td></td><td>600</td><td>HighTouch</td><td></td></tr>
                 </tbody>
               </table>
             </div>
@@ -243,6 +243,101 @@
         </footer>
       </section>
     </div>
-    <script src="app.js?v=20260916b"></script>
+    <div class="ht-backdrop hidden" id="ht-order-backdrop" role="presentation">
+      <section class="ht-order-dialog" role="dialog" aria-modal="true" aria-labelledby="ht-order-title">
+        <header class="dark-dialog-header">
+          <h2 id="ht-order-title">订单确认</h2>
+          <button type="button" data-close="ht-order-backdrop" aria-label="关闭">×</button>
+        </header>
+        <div class="ht-order-body">
+          <h3>交易要素</h3>
+          <dl class="ht-order-details">
+            <div><dt>资金账号</dt><dd>P2262403045</dd></div>
+            <div><dt>对冲渠道</dt><dd>QFII</dd></div>
+            <div><dt>订单类型</dt><dd>市价单</dd></div>
+            <div><dt>市价类型</dt><dd>即时成交剩余撤销</dd></div>
+            <div><dt>策略名称</dt><dd>20260819_QFII</dd></div>
+            <div><dt>币种</dt><dd>CNY</dd></div>
+            <div><dt>证券代码</dt><dd>000001</dd></div>
+            <div><dt>数量</dt><dd>600</dd></div>
+            <div><dt>订单方向</dt><dd class="buy-text">买入</dd></div>
+            <div><dt>算法类型</dt><dd>None</dd></div>
+            <div><dt>订单模式</dt><dd>HighTouch</dd></div>
+            <div><dt>手工成交</dt><dd>否</dd></div>
+            <div><dt>备注</dt><dd></dd></div>
+          </dl>
+        </div>
+        <footer class="dark-dialog-actions three-actions">
+          <button type="button" class="danger" id="ht-reject">拒绝</button>
+          <button type="button" class="primary" id="ht-submit">确定</button>
+          <button type="button" data-close="ht-order-backdrop">取消</button>
+        </footer>
+      </section>
+    </div>
+    <div class="ht-backdrop hidden" id="split-backdrop" role="presentation">
+      <section class="split-dialog" role="dialog" aria-modal="true" aria-labelledby="split-title">
+        <header class="dark-dialog-header">
+          <h2 id="split-title">拆单信息录入</h2>
+          <button type="button" data-close="split-backdrop" aria-label="关闭">×</button>
+        </header>
+        <div class="split-context">框架名称：20260819_QFII　客户名称：牛定于　资金账号名称：牛定于购买力账号　标的代码：000001　证券类型：STOCK　币种：CNY　方向：Buy　价格：市价</div>
+        <div class="split-body">
+          <section class="split-section split-detail-section">
+            <header><h3>拆单明细</h3><button type="button" class="primary" id="split-add">新增</button></header>
+            <div class="split-table-wrap">
+              <table class="split-table">
+                <thead><tr><th>证券代码</th><th>订单类型</th><th>市价类型</th><th>证券类型</th><th>币种</th><th>方向</th><th>状态</th><th>价格</th><th>保护限价</th><th>数量</th><th>对冲渠道</th><th>自定义渠道</th><th>渠道可用持仓</th><th>订单模式</th><th>算法参数</th><th>备注</th><th>操作</th></tr></thead>
+                <tbody id="split-detail-body"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="split-section hedge-section">
+            <header><h3>对冲持仓</h3></header>
+            <div class="split-table-wrap">
+              <table class="split-table hedge-table">
+                <thead><tr><th>证券代码</th><th>持仓类型</th><th>对冲渠道</th><th>自定义渠道</th><th>对冲资金账号</th><th>期初数量</th><th>日间开仓数量</th><th>日间平仓数量</th><th>可用持仓数量</th><th>当前持仓数量</th></tr></thead>
+                <tbody><tr><td>000001</td><td>多头</td><td>BBGFIX</td><td>QFII</td><td>TESTCMHK</td><td>2700</td><td>0</td><td>0</td><td>2700</td><td>2700</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+        <footer class="dark-dialog-actions">
+          <button type="button" class="primary" id="split-confirm">确认</button>
+          <button type="button" data-close="split-backdrop">取消</button>
+        </footer>
+      </section>
+    </div>
+    <div class="ht-backdrop nested hidden" id="split-add-backdrop" role="presentation">
+      <section class="split-add-dialog" role="dialog" aria-modal="true" aria-labelledby="split-add-title">
+        <header class="dark-dialog-header">
+          <h2 id="split-add-title">新增拆单</h2>
+          <button type="button" data-close="split-add-backdrop" aria-label="关闭">×</button>
+        </header>
+        <div class="split-add-body">
+          <h3>交易要素</h3>
+          <div class="split-add-form">
+            <label><span>资金账号</span><input value="牛定于购买力账号" disabled /></label>
+            <label><span>对冲渠道</span><select><option>QFII</option></select></label>
+            <label><span>订单类型</span><select id="split-order-type"><option value="market">市价单</option><option value="limit">限价单</option></select></label>
+            <label id="split-market-type-row"><span>市价类型</span><select><option>即时成交剩余撤销</option><option>最优五档即时成交剩余撤销</option><option>对手方最优价格</option><option>本方最优价格</option><option>全额成交或撤销</option></select></label>
+            <label><span>策略名称</span><input value="20260819_QFII" disabled /></label>
+            <label><span>币种</span><input value="CNY" disabled /></label>
+            <label><span>证券代码</span><input value="000001" disabled /></label>
+            <label><span>数量</span><input id="split-quantity" type="number" min="1" value="600" /></label>
+            <label id="split-price-row" class="hidden"><span>价格</span><input id="split-price" type="number" min="0" step="0.01" /></label>
+            <label><span>订单方向</span><input value="买入" disabled /></label>
+            <label><span>算法类型</span><select><option>None</option></select></label>
+            <label><span>订单模式</span><select><option>HighTouch</option></select></label>
+            <label><span>手工成交</span><input class="check-input" type="checkbox" /></label>
+            <label><span>备注</span><input /></label>
+          </div>
+        </div>
+        <footer class="dark-dialog-actions">
+          <button type="button" class="primary" id="split-add-confirm">确定</button>
+          <button type="button" data-close="split-add-backdrop">取消</button>
+        </footer>
+      </section>
+    </div>
+    <script src="app.js?v=20260916c"></script>
   </body>
 </html>

@@ -126,6 +126,39 @@ function closeBatchDialog() {
   $('#batch-backdrop').classList.add('hidden');
 }
 
+function openLayer(id) {
+  document.getElementById(id)?.classList.remove('hidden');
+}
+
+function closeLayer(id) {
+  document.getElementById(id)?.classList.add('hidden');
+}
+
+function activateHighTouchOrder() {
+  $('#hightouch-actions').innerHTML = '<button data-ht-action="direct">直接下单</button><button data-ht-action="split">拆单</button>';
+  toast('HighTouch订单已确认', 'info');
+}
+
+function toggleSplitOrderFields() {
+  const isMarket = $('#split-order-type').value === 'market';
+  $('#split-market-type-row').classList.toggle('hidden', !isMarket);
+  $('#split-price-row').classList.toggle('hidden', isMarket);
+  if (isMarket) $('#split-price').value = '';
+}
+
+function addSplitDetail() {
+  const quantity = Number($('#split-quantity').value || 0);
+  if (quantity <= 0) return toast('请输入有效数量');
+  const isMarket = $('#split-order-type').value === 'market';
+  const price = Number($('#split-price').value || 0);
+  if (!isMarket && price <= 0) return toast('请输入有效价格');
+  const row = isMarket
+    ? ['000001', '市价单', '即时成交剩余撤销', 'STOCK', 'CNY', 'Buy', '待报', '市价', '', quantity, 'QFII', '', '2700', 'HighTouch', 'None', '', '<button>删除</button>']
+    : ['000001', '限价单', '', 'STOCK', 'CNY', 'Buy', '待报', price.toFixed(2), '', quantity, 'QFII', '', '2700', 'HighTouch', 'None', '', '<button>删除</button>'];
+  $('#split-detail-body').insertAdjacentHTML('beforeend', `<tr>${row.map(value => `<td>${value}</td>`).join('')}</tr>`);
+  closeLayer('split-add-backdrop');
+}
+
 function updateMarketTypes(config) {
   const select = $('#market-type');
   const types = config?.types || [];
@@ -371,10 +404,47 @@ $('#batch-import').addEventListener('click', () => {
   closeBatchDialog();
   toast(`已导入 ${batchImportRows.length} 笔订单`, 'info');
 });
+$('#orders-list-body').addEventListener('click', event => {
+  const action = event.target.closest('[data-ht-action]')?.dataset.htAction;
+  if (!action) return;
+  if (action === 'accept') activateHighTouchOrder();
+  if (action === 'cancel') toast('订单已撤销（演示）', 'info');
+  if (action === 'direct') openLayer('ht-order-backdrop');
+  if (action === 'split') openLayer('split-backdrop');
+});
+$$('[data-close]').forEach(button => button.addEventListener('click', () => closeLayer(button.dataset.close)));
+$('#ht-order-backdrop').addEventListener('click', event => {
+  if (event.target === $('#ht-order-backdrop')) closeLayer('ht-order-backdrop');
+});
+$('#split-backdrop').addEventListener('click', event => {
+  if (event.target === $('#split-backdrop')) closeLayer('split-backdrop');
+});
+$('#split-add-backdrop').addEventListener('click', event => {
+  if (event.target === $('#split-add-backdrop')) closeLayer('split-add-backdrop');
+});
+$('#ht-reject').addEventListener('click', () => {
+  closeLayer('ht-order-backdrop');
+  toast('订单已拒绝（演示）', 'info');
+});
+$('#ht-submit').addEventListener('click', () => {
+  closeLayer('ht-order-backdrop');
+  toast('HighTouch订单已提交（演示）', 'info');
+});
+$('#split-add').addEventListener('click', () => openLayer('split-add-backdrop'));
+$('#split-order-type').addEventListener('change', toggleSplitOrderFields);
+$('#split-add-confirm').addEventListener('click', addSplitDetail);
+$('#split-confirm').addEventListener('click', () => {
+  if (!$('#split-detail-body').children.length) return toast('请先新增拆单明细');
+  closeLayer('split-backdrop');
+  toast('拆单已提交（演示）', 'info');
+});
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     closeConfirmation();
     closeBatchDialog();
+    closeLayer('ht-order-backdrop');
+    closeLayer('split-backdrop');
+    closeLayer('split-add-backdrop');
   }
 });
 
