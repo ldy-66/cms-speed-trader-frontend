@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 普通版</title>
-    <link rel="stylesheet" href="styles.css?v=20260914" />
+    <link rel="stylesheet" href="styles.css?v=20260916b" />
   </head>
   <body>
     <div class="app-shell">
@@ -57,7 +57,7 @@
           </button>
         </aside>
 
-        <main class="terminal">
+        <main class="terminal" id="market-terminal">
           <section class="market-list">
             <div class="top-tabs">
               <button class="top-tab active">自选</button>
@@ -136,6 +136,51 @@
             </section>
           </aside>
         </main>
+
+        <main class="orders-workspace hidden" id="orders-workspace">
+          <section class="orders-card">
+            <header class="orders-title">委托列表</header>
+            <div class="orders-tabs">
+              <button class="active">全部</button>
+              <button>600315</button>
+              <button aria-label="关闭页签">×</button>
+              <button aria-label="新增页签">＋</button>
+            </div>
+            <div class="orders-filters">
+              <select><option>交易对手名称</option></select>
+              <select><option>资金账号名称</option></select>
+              <select><option>标的代码</option></select>
+              <select><option>订单模式</option></select>
+              <select><option>订单状态</option></select>
+              <button class="outline-blue">展开⌄</button>
+              <button class="primary-blue">筛选</button>
+            </div>
+            <div class="orders-actions">
+              <button>撤单</button>
+              <button class="danger">全撤</button>
+              <button class="primary-blue" id="batch-order-open">批量下单</button>
+            </div>
+            <div class="orders-table-wrap">
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>序列</th><th>操作</th><th>订单方向</th><th>订单状态</th><th>业务类型</th><th>资金账号名称</th><th>订单类型</th><th>市价类型</th><th>标的代码</th><th>标的名称</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>导入结果</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-list-body">
+                  <tr><td>1</td><td><button>修改</button></td><td class="sell-text">卖出</td><td>已成</td><td>普通交易</td><td>80882048购买力账号</td><td>限价单</td><td></td><td>600009</td><td>上海机场</td><td>22.85</td><td></td><td>10,000</td><td>LowTouch</td><td></td></tr>
+                  <tr><td>2</td><td><button>直接下单</button><button>拆单</button></td><td class="buy-text">买入</td><td class="pending-status">待报</td><td>普通交易</td><td>牛定于购买力账号</td><td>市价单</td><td>即时成交剩余撤销</td><td>000001</td><td>平安银行</td><td>市价</td><td></td><td>600</td><td>HighTouch</td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <footer class="orders-pagination">第 1 / 2 页, 共 36 条　20条/页　‹　›</footer>
+          </section>
+          <div class="orders-bottom-grid">
+            <section><header>对冲委托订单</header><div class="empty-table-head">序列　　操作　　　　子单编号　　　　标的代码　　　　标的名称</div></section>
+            <section><header>对冲成交列表</header><div class="empty-table-head">序列　　标的代码　　　　成交编号　　　　成交价格　　　　成交数量</div></section>
+            <section><header>五档行情</header><div class="orders-quote"><strong>平安银行</strong><span>000001.SZ</span><b>11.70</b></div></section>
+          </div>
+        </main>
       </div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -170,6 +215,34 @@
         </footer>
       </section>
     </div>
-    <script src="app.js?v=20260915"></script>
+    <div class="batch-backdrop hidden" id="batch-backdrop" role="presentation">
+      <section class="batch-dialog" role="dialog" aria-modal="true" aria-labelledby="batch-title">
+        <header class="batch-header">
+          <h2 id="batch-title">批量下单</h2>
+          <button type="button" id="batch-close" aria-label="关闭">×</button>
+        </header>
+        <div class="batch-body">
+          <div class="batch-file-row">
+            <a class="template-download" href="assets/批量下单模板-市价类型.xlsx" download>下载模板</a>
+            <label class="file-picker">选择文件<input id="batch-file" type="file" accept=".xlsx" /></label>
+            <span id="batch-file-name">未选择文件</span>
+          </div>
+          <div class="batch-preview hidden" id="batch-preview">
+            <div class="batch-summary"><strong>3</strong> 笔订单待导入</div>
+            <div class="batch-preview-table-wrap">
+              <table class="batch-preview-table">
+                <thead><tr><th>行号</th><th>业务类型</th><th>资金账号名称</th><th>订单类型</th><th>市价类型</th><th>标的代码</th><th>订单方向</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>校验结果</th></tr></thead>
+                <tbody id="batch-preview-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <footer class="batch-actions">
+          <button type="button" id="batch-cancel">取消</button>
+          <button type="button" class="primary-blue" id="batch-import" disabled>确认导入</button>
+        </footer>
+      </section>
+    </div>
+    <script src="app.js?v=20260916b"></script>
   </body>
 </html>

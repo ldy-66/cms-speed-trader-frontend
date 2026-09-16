@@ -11,6 +11,12 @@ const quoteData = [
   ['000001.SZC', '平安银行', '1,022,543,914.24', '11.70', '11.68', '10.53'],
 ];
 
+const batchImportRows = [
+  { business: '普通交易', account: '牛定于购买力账号', orderType: '市价单', marketType: '最优五档即时成交剩余撤销', security: '600519', name: '贵州茅台', side: '买入', price: '', protection: '1,730.00', quantity: '300', mode: 'HighTouch' },
+  { business: '普通交易', account: '80882048购买力账号', orderType: '市价单', marketType: '即时成交剩余撤销', security: '000001', name: '平安银行', side: '卖出', price: '', protection: '', quantity: '600', mode: 'LowTouch' },
+  { business: '普通交易', account: '80882048购买力账号', orderType: '限价单', marketType: '', security: '600009', name: '上海机场', side: '买入', price: '22.85', protection: '', quantity: '1,000', mode: 'LowTouch' },
+];
+
 // 原型通过本地数据模拟后端返回；生产前端不保存市价类型和保护限价规则。
 const marketTypeLicenseEnabled = new URLSearchParams(window.location.search).get('marketTypeLicense') !== 'off';
 const demoBackendOrderEntryConfig = {
@@ -84,6 +90,40 @@ function securityMarket(code) {
 function requestOrderEntryConfig(code) {
   const config = demoBackendOrderEntryConfig[securityMarket(code)];
   return Promise.resolve(config || { protectionLimit: { visible: false, required: false }, types: [] });
+}
+
+function renderBatchPreview() {
+  $('#batch-preview-body').innerHTML = batchImportRows.map((row, index) => `
+    <tr>
+      <td>${index + 2}</td><td>${row.business}</td><td>${row.account}</td><td>${row.orderType}</td><td>${row.marketType}</td><td>${row.security}</td><td>${row.side}</td><td>${row.price}</td><td>${row.protection}</td><td>${row.quantity}</td><td>${row.mode}</td><td class="valid">通过</td>
+    </tr>`).join('');
+}
+
+function appendImportedOrders() {
+  const body = $('#orders-list-body');
+  const start = body.children.length + 1;
+  body.insertAdjacentHTML('beforeend', batchImportRows.map((row, index) => `
+    <tr>
+      <td>${start + index}</td><td><button>修改</button></td><td class="${row.side === '买入' ? 'buy-text' : 'sell-text'}">${row.side}</td><td class="pending-status">待报</td><td>${row.business}</td><td>${row.account}</td><td>${row.orderType}</td><td>${row.marketType}</td><td>${row.security}</td><td>${row.name}</td><td>${row.orderType === '市价单' ? '市价' : row.price}</td><td>${row.protection}</td><td>${row.quantity}</td><td>${row.mode}</td><td class="success-text">导入成功</td>
+    </tr>`).join(''));
+}
+
+function showWorkspace(view) {
+  const showOrders = view === 'orders';
+  $('#market-terminal').classList.toggle('hidden', showOrders);
+  $('#orders-workspace').classList.toggle('hidden', !showOrders);
+}
+
+function openBatchDialog() {
+  $('#batch-file').value = '';
+  $('#batch-file-name').textContent = '未选择文件';
+  $('#batch-preview').classList.add('hidden');
+  $('#batch-import').disabled = true;
+  $('#batch-backdrop').classList.remove('hidden');
+}
+
+function closeBatchDialog() {
+  $('#batch-backdrop').classList.add('hidden');
 }
 
 function updateMarketTypes(config) {
@@ -243,6 +283,7 @@ updateOrderType();
 $$('.nav-item').forEach(button => button.addEventListener('click', () => {
   $$('.nav-item').forEach(item => item.classList.remove('active'));
   button.classList.add('active');
+  showWorkspace(button.dataset.section === '交易' ? 'orders' : 'market');
 }));
 
 $$('.top-tab').forEach(button => button.addEventListener('click', () => {
@@ -311,6 +352,35 @@ $('#confirm-submit').addEventListener('click', () => {
   closeConfirmation();
   toast(`${side}委托已提交（演示）`, 'info');
 });
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') closeConfirmation();
+$('#batch-order-open').addEventListener('click', openBatchDialog);
+$('#batch-close').addEventListener('click', closeBatchDialog);
+$('#batch-cancel').addEventListener('click', closeBatchDialog);
+$('#batch-backdrop').addEventListener('click', event => {
+  if (event.target === $('#batch-backdrop')) closeBatchDialog();
 });
+$('#batch-file').addEventListener('change', event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  $('#batch-file-name').textContent = file.name;
+  renderBatchPreview();
+  $('#batch-preview').classList.remove('hidden');
+  $('#batch-import').disabled = false;
+});
+$('#batch-import').addEventListener('click', () => {
+  appendImportedOrders();
+  closeBatchDialog();
+  toast(`已导入 ${batchImportRows.length} 笔订单`, 'info');
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closeConfirmation();
+    closeBatchDialog();
+  }
+});
+
+if (new URLSearchParams(window.location.search).get('view') === 'batch') {
+  const tradeNav = $$('.nav-item').find(button => button.dataset.section === '交易');
+  $$('.nav-item').forEach(item => item.classList.remove('active'));
+  tradeNav?.classList.add('active');
+  showWorkspace('orders');
+}
