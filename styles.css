@@ -320,6 +320,114 @@ select:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px rgb
 }
 .toast.error.show { transform: translateX(0); }
 
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgb(10 20 28 / 26%);
+}
+
+.order-confirm {
+  width: 330px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #78848d;
+  border-radius: 7px;
+  background: #f5f5f5;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 28%);
+}
+
+.order-confirm-titlebar {
+  height: 32px;
+  flex: 0 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 10px;
+  border-bottom: 1px solid #c9cdd1;
+  background: #eef1f4;
+  font-size: 14px;
+}
+
+.order-confirm-titlebar button {
+  width: 36px;
+  height: 31px;
+  border: 0;
+  background: transparent;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.order-confirm-titlebar button:hover { color: #fff; background: #d94136; }
+
+.order-confirm-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px 12px;
+  background: #fff;
+}
+
+.market-risk {
+  margin-bottom: 13px;
+  padding: 9px 10px;
+  border-left: 4px solid #e68a12;
+  background: #fff3df;
+  color: #8b4a00;
+  line-height: 1.55;
+}
+
+.confirm-intro,
+.confirm-question {
+  margin: 0;
+  font-weight: 700;
+}
+
+.confirm-details {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 6px 8px;
+  margin: 17px 0;
+  line-height: 1.35;
+}
+
+.confirm-details dt,
+.confirm-details dd { margin: 0; }
+.confirm-details dt { text-align: right; color: #3f474d; }
+.confirm-details dd { overflow-wrap: anywhere; font-weight: 600; }
+.confirm-details .buy-text { color: var(--red); }
+.confirm-details .sell-text { color: var(--green); }
+
+.order-confirm-actions {
+  height: 58px;
+  flex: 0 0 58px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 13px 18px;
+  border-top: 1px solid #d6d9dc;
+  background: #f2f3f4;
+}
+
+.order-confirm-actions button {
+  width: 106px;
+  border: 1px solid #aeb3b7;
+  background: #fff;
+  cursor: pointer;
+}
+
+.order-confirm-actions .confirm-primary {
+  border-color: var(--blue-dark);
+  color: #fff;
+  background: var(--blue);
+}
+
+.order-confirm-actions button:hover { filter: brightness(1.04); }
+.order-confirm-actions button:disabled { cursor: default; opacity: .55; }
+
 @media (max-height: 820px) {
   .sidebar { padding-top: 160px; }
   .sent-orders { min-height: 380px; }

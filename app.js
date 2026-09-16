@@ -44,6 +44,7 @@ const demoBackendOrderEntryConfig = {
 };
 
 let activeOrderEntryConfig = null;
+let pendingOrderSnapshot = null;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -170,13 +171,97 @@ function guardMarketTypeSelection(event) {
   setSecurityError(true);
 }
 
+function createOrderSnapshot(side) {
+  const security = $('#security').value;
+  const securityText = $('#security').selectedOptions[0]?.textContent || '';
+  const securityName = securityText.replace(security, '').trim();
+  const quantity = Number($('#quantity').value || 0);
+  const isMarket = $('#order-type').value === 'market';
+  const marketTypeLabel = $('#market-type').selectedOptions[0]?.textContent || '';
+  const price = Number($('#price').value || 0);
+
+  return {
+    security,
+    securityName,
+    side,
+    isMarket,
+    marketTypeLabel,
+    protectionLimitVisible: isMarket && Boolean(activeOrderEntryConfig?.protectionLimit.visible),
+    price,
+    quantity,
+    amount: $('#amount').value,
+    currency: 'CNY',
+    orderMode: $('#order-mode').selectedOptions[0]?.textContent || '',
+    remark: $('#remark').value,
+  };
+}
+
+function addConfirmDetail(label, value, className = '') {
+  const details = $('#confirm-details');
+  const dt = document.createElement('dt');
+  const dd = document.createElement('dd');
+  dt.textContent = `${label}：`;
+  dd.textContent = value || '';
+  if (className) dd.className = className;
+  details.append(dt, dd);
+}
+
+function openOrderConfirmation(snapshot) {
+  pendingOrderSnapshot = snapshot;
+  const details = $('#confirm-details');
+  details.innerHTML = '';
+
+  const risk = $('#market-risk');
+  risk.classList.toggle('hidden', !snapshot.isMarket);
+  risk.textContent = snapshot.protectionLimitVisible
+    ? '市价单实际成交价格和成交数量存在不确定性。保护限价用于限制可以接受的成交价格范围。'
+    : '市价单实际成交价格和成交数量存在不确定性，请确认订单信息后再提交。';
+
+  addConfirmDetail('合约编号', snapshot.security);
+  addConfirmDetail('合约名称', snapshot.securityName);
+  addConfirmDetail('委托方向', snapshot.side, snapshot.side === 'Buy' ? 'buy-text' : 'sell-text');
+  addConfirmDetail('报价方式', snapshot.isMarket ? 'Market' : 'Limit');
+  if (snapshot.isMarket && marketTypeLicenseEnabled) addConfirmDetail('市价类型', snapshot.marketTypeLabel);
+  if (!snapshot.isMarket) addConfirmDetail('委托价格', snapshot.price.toFixed(2));
+  if (snapshot.protectionLimitVisible) addConfirmDetail('保护限价', snapshot.price.toFixed(2));
+  addConfirmDetail('委托数量', snapshot.quantity.toLocaleString('zh-CN'));
+  if (!snapshot.isMarket) addConfirmDetail('委托金额', snapshot.amount);
+  addConfirmDetail('委托币种', snapshot.currency);
+  addConfirmDetail('订单模式', snapshot.orderMode);
+  addConfirmDetail('备注', snapshot.remark);
+
+  const backdrop = $('#order-confirm-backdrop');
+  backdrop.classList.remove('hidden');
+  backdrop.setAttribute('aria-hidden', 'false');
+  $('#confirm-order').disabled = false;
+  $('#confirm-order').focus();
+}
+
+function closeOrderConfirmation() {
+  const backdrop = $('#order-confirm-backdrop');
+  backdrop.classList.add('hidden');
+  backdrop.setAttribute('aria-hidden', 'true');
+  pendingOrderSnapshot = null;
+}
+
+function submitConfirmedOrder(snapshot) {
+  const entrustBody = $('#entrust-rows');
+  const tr = document.createElement('tr');
+  const id = `WT${Date.now().toString().slice(-8)}`;
+  const orderType = snapshot.isMarket && snapshot.marketTypeLabel && marketTypeLicenseEnabled
+    ? `Market · ${snapshot.marketTypeLabel}`
+    : (snapshot.isMarket ? 'Market' : 'Limit');
+  tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${snapshot.security}</td><td>${snapshot.securityName}</td><td>${snapshot.isMarket ? 'Market' : 'Limit'}</td><td>${snapshot.isMarket && marketTypeLicenseEnabled ? snapshot.marketTypeLabel : '—'}</td><td>${snapshot.side}</td>`;
+  entrustBody.prepend(tr);
+  toast(`${snapshot.side === 'Buy' ? '买入' : '卖出'} ${orderType} 委托已加入列表（演示数据）`);
+}
+
 function placeOrder(side) {
   const security = $('#security').value;
   const quantity = Number($('#quantity').value || 0);
   const isMarket = $('#order-type').value === 'market';
   const marketType = $('#market-type').value;
   const marketTypeLabel = $('#market-type').selectedOptions[0]?.textContent || '';
-  const orderType = isMarket && marketTypeLabel && marketTypeLicenseEnabled ? `Market · ${marketTypeLabel}` : (isMarket ? 'Market' : 'Limit');
   if (!security) {
     setSecurityError(true);
     return;
@@ -189,12 +274,7 @@ function placeOrder(side) {
     return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
   }
 
-  const entrustBody = $('#entrust-rows');
-  const tr = document.createElement('tr');
-  const id = `WT${Date.now().toString().slice(-8)}`;
-  tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${security}</td><td>${$('#security').selectedOptions[0].textContent.replace(security, '').trim()}</td><td>${isMarket ? 'Market' : 'Limit'}</td><td>${isMarket && marketTypeLicenseEnabled ? marketTypeLabel : '—'}</td><td>${side}</td>`;
-  entrustBody.prepend(tr);
-  toast(`${side === 'Buy' ? '买入' : '卖出'} ${orderType} 委托已加入列表（演示数据）`);
+  openOrderConfirmation(createOrderSnapshot(side));
 }
 
 renderCustomerOrders();
@@ -295,6 +375,21 @@ $('#security').addEventListener('change', () => {
   if ($('#order-type').value === 'market') updateOrderControls();
 });
 $$('.submit').forEach(button => button.addEventListener('click', () => placeOrder(button.dataset.side)));
+
+$('#close-order-confirm').addEventListener('click', closeOrderConfirmation);
+$('#cancel-order-confirm').addEventListener('click', closeOrderConfirmation);
+$('#confirm-order').addEventListener('click', () => {
+  if (!pendingOrderSnapshot) return;
+  const snapshot = pendingOrderSnapshot;
+  $('#confirm-order').disabled = true;
+  submitConfirmedOrder(snapshot);
+  closeOrderConfirmation();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !$('#order-confirm-backdrop').classList.contains('hidden')) {
+    closeOrderConfirmation();
+  }
+});
 
 $('#entrust-rows').addEventListener('click', event => {
   if (!event.target.matches('.entrust-cancel')) return;

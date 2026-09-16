@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 前端复刻</title>
-    <link rel="stylesheet" href="styles.css?v=20260914" />
+    <link rel="stylesheet" href="styles.css?v=20260916" />
   </head>
   <body>
     <div class="app-shell">
@@ -148,6 +148,26 @@
       </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
-    <script src="app.js?v=20260915"></script>
+
+    <div class="confirm-backdrop hidden" id="order-confirm-backdrop" aria-hidden="true">
+      <section class="order-confirm" role="dialog" aria-modal="true" aria-labelledby="order-confirm-title">
+        <header class="order-confirm-titlebar">
+          <span id="order-confirm-title">下单确认</span>
+          <button type="button" id="close-order-confirm" aria-label="关闭">×</button>
+        </header>
+        <div class="order-confirm-body">
+          <div class="market-risk hidden" id="market-risk"></div>
+          <p class="confirm-intro">您要下单的信息为：</p>
+          <dl class="confirm-details" id="confirm-details"></dl>
+          <p class="confirm-question">您确定要下单吗？</p>
+        </div>
+        <footer class="order-confirm-actions">
+          <button type="button" class="confirm-primary" id="confirm-order">确定</button>
+          <button type="button" id="cancel-order-confirm">取消</button>
+        </footer>
+      </section>
+    </div>
+
+    <script src="app.js?v=20260916"></script>
   </body>
 </html>
