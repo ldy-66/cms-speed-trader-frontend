@@ -17,7 +17,7 @@ const batchImportRows = [
   { business: '普通交易', account: '80882048购买力账号', orderType: '限价单', marketType: '', security: '600009', name: '上海机场', side: '买入', price: '22.85', protection: '', quantity: '1,000', mode: 'LowTouch' },
 ];
 
-// 原型通过本地数据模拟后端返回；生产前端不保存市价类型和保护限价规则。
+// 原型通过本地数据模拟后端返回；生产前端不保存委托策略和保护限价规则。
 const marketTypeLicenseEnabled = new URLSearchParams(window.location.search).get('marketTypeLicense') !== 'off';
 const demoBackendOrderEntryConfig = {
   SH: {
@@ -163,7 +163,7 @@ function updateMarketTypes(config) {
   const select = $('#market-type');
   const types = config?.types || [];
   const previous = select.value;
-  select.innerHTML = '<option value="">请选择市价类型</option>' + (types || [])
+  select.innerHTML = '<option value="">请选择委托策略</option>' + (types || [])
     .map(([value, label]) => `<option value="${value}">${label}</option>`)
     .join('');
   if (types?.some(([value]) => value === previous)) select.value = previous;
@@ -299,7 +299,7 @@ function placeOrder() {
     return;
   }
   setSecurityError(false);
-  if (isMarket && marketTypeLicenseEnabled && !$('#market-type').value) return toast('请选择市价类型');
+  if (isMarket && marketTypeLicenseEnabled && !$('#market-type').value) return toast('请选择委托策略');
   const requiresProtectionPrice = isMarket && activeOrderEntryConfig?.protectionLimit.required;
   if ((!isMarket || requiresProtectionPrice) && price <= 0) {
     return toast(isMarket ? '请输入有效保护限价' : '请输入有效订单价格');

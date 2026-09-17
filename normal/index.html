@@ -121,7 +121,7 @@
                 <label class="order-row"><span>对冲渠道</span><select id="channel"><option value=""></option><option>DMA-01</option><option>算法路由</option></select></label>
                 <label class="order-row"><span>标的代码</span><select id="security"><option value=""></option><option value="000001.SZ" selected>000001.SZ 平安银行</option><option value="600519.SH">600519.SH 贵州茅台</option><option value="430047.BJ">430047.BJ 诺思兰德</option></select></label>
                 <label class="order-row"><span>订单类型</span><select id="order-type"><option value="limit">限价单</option><option value="market">市价单</option></select></label>
-                <label class="order-row hidden" id="market-type-field"><span>市价类型</span><select id="market-type"><option value="">请选择市价类型</option></select></label>
+                <label class="order-row hidden" id="market-type-field"><span>委托策略</span><select id="market-type"><option value="">请选择委托策略</option></select></label>
                 <div class="order-row"><span>订单方向</span><div class="side-switch"><button type="button" class="active buy-side" data-side="buy">买入</button><button type="button" data-side="sell">卖出</button></div></div>
                 <label class="order-row" id="price-field"><span id="price-label">订单价格</span><div class="stepper"><button type="button" data-target="price" data-dir="down">−</button><input id="price" type="number" min="0" step="0.01" value="11.85"/><button type="button" data-target="price" data-dir="up">＋</button></div></label>
                 <p class="price-caption" id="price-caption">等于当前价 <span>0.00%</span></p>
@@ -164,7 +164,7 @@
               <table class="orders-table">
                 <thead>
                   <tr>
-                    <th>序列</th><th>操作</th><th>订单方向</th><th>订单状态</th><th>业务类型</th><th>资金账号名称</th><th>订单类型</th><th>市价类型</th><th>标的代码</th><th>标的名称</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>导入结果</th>
+                    <th>序列</th><th>操作</th><th>订单方向</th><th>订单状态</th><th>业务类型</th><th>资金账号名称</th><th>订单类型</th><th>委托策略</th><th>标的代码</th><th>标的名称</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>导入结果</th>
                   </tr>
                 </thead>
                 <tbody id="orders-list-body">
@@ -201,7 +201,7 @@
             <div><dt>资金账号</dt><dd id="confirm-account"></dd></div>
             <div><dt>对冲渠道</dt><dd id="confirm-channel"></dd></div>
             <div><dt>订单类型</dt><dd id="confirm-order-type"></dd></div>
-            <div class="market-confirm-row"><dt>市价类型</dt><dd id="confirm-market-type"></dd></div>
+            <div class="market-confirm-row"><dt>委托策略</dt><dd id="confirm-market-type"></dd></div>
             <div><dt>标的代码</dt><dd id="confirm-security"></dd></div>
             <div><dt>订单方向</dt><dd id="confirm-side" class="confirm-side"></dd></div>
             <div><dt>订单模式</dt><dd id="confirm-mode"></dd></div>
@@ -223,7 +223,7 @@
         </header>
         <div class="batch-body">
           <div class="batch-file-row">
-            <a class="template-download" href="assets/批量下单模板-市价类型.xlsx" download>下载模板</a>
+            <a class="template-download" href="assets/批量下单模板-委托策略.xlsx" download>下载模板</a>
             <label class="file-picker">选择文件<input id="batch-file" type="file" accept=".xlsx" /></label>
             <span id="batch-file-name">未选择文件</span>
           </div>
@@ -231,7 +231,7 @@
             <div class="batch-summary"><strong>3</strong> 笔订单待导入</div>
             <div class="batch-preview-table-wrap">
               <table class="batch-preview-table">
-                <thead><tr><th>行号</th><th>业务类型</th><th>资金账号名称</th><th>订单类型</th><th>市价类型</th><th>标的代码</th><th>订单方向</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>校验结果</th></tr></thead>
+                <thead><tr><th>行号</th><th>业务类型</th><th>资金账号名称</th><th>订单类型</th><th>委托策略</th><th>标的代码</th><th>订单方向</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>校验结果</th></tr></thead>
                 <tbody id="batch-preview-body"></tbody>
               </table>
             </div>
@@ -255,7 +255,7 @@
             <div><dt>资金账号</dt><dd>P2262403045</dd></div>
             <div><dt>对冲渠道</dt><dd>QFII</dd></div>
             <div><dt>订单类型</dt><dd>市价单</dd></div>
-            <div><dt>市价类型</dt><dd>即时成交剩余撤销</dd></div>
+            <div><dt>委托策略</dt><dd>即时成交剩余撤销</dd></div>
             <div><dt>策略名称</dt><dd>20260819_QFII</dd></div>
             <div><dt>币种</dt><dd>CNY</dd></div>
             <div><dt>证券代码</dt><dd>000001</dd></div>
@@ -286,7 +286,7 @@
             <header><h3>拆单明细</h3><button type="button" class="primary" id="split-add">新增</button></header>
             <div class="split-table-wrap">
               <table class="split-table">
-                <thead><tr><th>证券代码</th><th>订单类型</th><th>市价类型</th><th>证券类型</th><th>币种</th><th>方向</th><th>状态</th><th>价格</th><th>保护限价</th><th>数量</th><th>对冲渠道</th><th>自定义渠道</th><th>渠道可用持仓</th><th>订单模式</th><th>算法参数</th><th>备注</th><th>操作</th></tr></thead>
+                <thead><tr><th>证券代码</th><th>订单类型</th><th>委托策略</th><th>证券类型</th><th>币种</th><th>方向</th><th>状态</th><th>价格</th><th>保护限价</th><th>数量</th><th>对冲渠道</th><th>自定义渠道</th><th>渠道可用持仓</th><th>订单模式</th><th>算法参数</th><th>备注</th><th>操作</th></tr></thead>
                 <tbody id="split-detail-body"></tbody>
               </table>
             </div>
@@ -319,7 +319,7 @@
             <label><span>资金账号</span><input value="牛定于购买力账号" disabled /></label>
             <label><span>对冲渠道</span><select><option>QFII</option></select></label>
             <label><span>订单类型</span><select id="split-order-type"><option value="market">市价单</option><option value="limit">限价单</option></select></label>
-            <label id="split-market-type-row"><span>市价类型</span><select><option>即时成交剩余撤销</option><option>最优五档即时成交剩余撤销</option><option>对手方最优价格</option><option>本方最优价格</option><option>全额成交或撤销</option></select></label>
+            <label id="split-market-type-row"><span>委托策略</span><select><option>即时成交剩余撤销</option><option>最优五档即时成交剩余撤销</option><option>对手方最优价格</option><option>本方最优价格</option><option>全额成交或撤销</option></select></label>
             <label><span>策略名称</span><input value="20260819_QFII" disabled /></label>
             <label><span>币种</span><input value="CNY" disabled /></label>
             <label><span>证券代码</span><input value="000001" disabled /></label>

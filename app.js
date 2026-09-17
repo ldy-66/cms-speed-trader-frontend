@@ -17,7 +17,7 @@ const batchImportRows = [
   { account: '11001000101-CNY', orderType: 'Limit', marketType: '', security: '600009', name: '上海机场', side: 'Buy', price: '22.85', protection: '', quantity: '1,000', mode: 'LowTouch' },
 ];
 
-// 原型通过本地数据模拟后端返回；生产前端不保存市价类型和保护限价规则。
+// 原型通过本地数据模拟后端返回；生产前端不保存委托策略和保护限价规则。
 const marketTypeLicenseEnabled = new URLSearchParams(window.location.search).get('marketTypeLicense') !== 'off';
 const demoBackendOrderEntryConfig = {
   SH: {
@@ -202,11 +202,11 @@ function updateMarketTypeOptions(config) {
   const previous = select.value;
 
   if (!config?.types.length) {
-    select.innerHTML = '<option value="">请选择市价类型</option>';
+    select.innerHTML = '<option value="">请选择委托策略</option>';
     select.disabled = false;
   } else {
     select.disabled = false;
-    select.innerHTML = '<option value="">请选择市价类型</option>' + config.types
+    select.innerHTML = '<option value="">请选择委托策略</option>' + config.types
       .map(type => `<option value="${type.value}">${type.label}</option>`)
       .join('');
     if (config.types.some(type => type.value === previous)) select.value = previous;
@@ -306,7 +306,7 @@ function openOrderConfirmation(snapshot) {
   addConfirmDetail('合约名称', snapshot.securityName);
   addConfirmDetail('委托方向', snapshot.side, snapshot.side === 'Buy' ? 'buy-text' : 'sell-text');
   addConfirmDetail('报价方式', snapshot.isMarket ? 'Market' : 'Limit');
-  if (snapshot.isMarket && marketTypeLicenseEnabled) addConfirmDetail('市价类型', snapshot.marketTypeLabel);
+  if (snapshot.isMarket && marketTypeLicenseEnabled) addConfirmDetail('委托策略', snapshot.marketTypeLabel);
   if (!snapshot.isMarket) addConfirmDetail('委托价格', snapshot.price.toFixed(2));
   if (snapshot.protectionLimitVisible) addConfirmDetail('保护限价', snapshot.price.toFixed(2));
   addConfirmDetail('委托数量', snapshot.quantity.toLocaleString('zh-CN'));
@@ -354,7 +354,7 @@ function placeOrder(side) {
   }
   setSecurityError(false);
   if (quantity <= 0) return toast('请输入有效数量', 'error');
-  if (isMarket && marketTypeLicenseEnabled && !marketType) return toast('请选择市价类型', 'error');
+  if (isMarket && marketTypeLicenseEnabled && !marketType) return toast('请选择委托策略', 'error');
   const requiresProtectionPrice = isMarket && activeOrderEntryConfig?.protectionLimit.required;
   if ((!isMarket || requiresProtectionPrice) && Number($('#price').value || 0) <= 0) {
     return toast(isMarket ? '市价单请输入保护限价' : '限价单请输入有效价格', 'error');
