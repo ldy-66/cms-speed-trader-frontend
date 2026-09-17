@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 前端复刻</title>
-    <link rel="stylesheet" href="styles.css?v=20260916" />
+    <link rel="stylesheet" href="styles.css?v=20260917b" />
   </head>
   <body>
     <div class="app-shell">
@@ -93,7 +93,7 @@
               <section class="panel">
                 <div class="panel-title collapsible" data-target="entrust-body"><span>对冲委托订单</span><span class="caret">▾</span></div>
                 <div class="table-wrap fill" id="entrust-body">
-                  <table class="data-table dense-table entrust-table"><thead><tr><th>操作</th><th>委托编号</th><th>证券代码</th><th>证券名称</th><th>订单类型</th><th>市价类型</th><th>买卖方向</th></tr></thead><tbody id="entrust-rows"></tbody></table>
+                  <table class="data-table dense-table entrust-table"><thead><tr><th>操作</th><th>委托编号</th><th>证券代码</th><th>证券名称</th><th>订单类型</th><th class="licensed-market-type">市价类型</th><th>买卖方向</th></tr></thead><tbody id="entrust-rows"></tbody></table>
                 </div>
               </section>
               <section class="panel">
@@ -168,6 +168,131 @@
       </section>
     </div>
 
-    <script src="app.js?v=20260916"></script>
+    <div class="batch-backdrop hidden" id="batch-backdrop" role="presentation">
+      <section class="batch-dialog" role="dialog" aria-modal="true" aria-labelledby="batch-title">
+        <header class="batch-header">
+          <h2 id="batch-title">批量下单</h2>
+          <button type="button" id="batch-close" aria-label="关闭">×</button>
+        </header>
+        <div class="batch-body">
+          <div class="batch-file-row">
+            <a class="template-download" href="normal/assets/批量下单模板-市价类型.xlsx" download>下载模板</a>
+            <label class="file-picker">选择文件<input id="batch-file" type="file" accept=".xlsx" /></label>
+            <span id="batch-file-name">未选择文件</span>
+          </div>
+          <div class="batch-preview hidden" id="batch-preview">
+            <div class="batch-summary"><strong>3</strong> 笔订单待导入</div>
+            <div class="batch-preview-table-wrap">
+              <table class="batch-preview-table">
+                <thead><tr><th>行号</th><th>资金账号</th><th>订单类型</th><th class="licensed-market-type">市价类型</th><th>证券代码</th><th>买卖方向</th><th>委托价格</th><th>保护限价</th><th>委托数量</th><th>订单模式</th><th>校验结果</th></tr></thead>
+                <tbody id="batch-preview-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <footer class="batch-actions">
+          <button type="button" id="batch-cancel">取消</button>
+          <button type="button" class="primary-blue" id="batch-import" disabled>确认导入</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="ht-backdrop hidden" id="ht-order-backdrop" role="presentation">
+      <section class="ht-order-dialog" role="dialog" aria-modal="true" aria-labelledby="ht-order-title">
+        <header class="dialog-header">
+          <h2 id="ht-order-title">订单确认</h2>
+          <button type="button" data-close="ht-order-backdrop" aria-label="关闭">×</button>
+        </header>
+        <div class="ht-order-body">
+          <h3>交易要素</h3>
+          <dl class="ht-order-details">
+            <div><dt>资金账号</dt><dd>11001000101-CNY</dd></div>
+            <div><dt>对冲渠道</dt><dd>QFII</dd></div>
+            <div><dt>订单类型</dt><dd>Market</dd></div>
+            <div class="licensed-market-type"><dt>市价类型</dt><dd>即时成交剩余撤销</dd></div>
+            <div><dt>框架名称</dt><dd>10001_CNY_QFII</dd></div>
+            <div><dt>币种</dt><dd>CNY</dd></div>
+            <div><dt>证券代码</dt><dd>000001</dd></div>
+            <div><dt>数量</dt><dd>600</dd></div>
+            <div><dt>订单方向</dt><dd class="buy-text">Buy</dd></div>
+            <div><dt>算法类型</dt><dd>None</dd></div>
+            <div><dt>订单模式</dt><dd>HighTouch</dd></div>
+            <div><dt>备注</dt><dd></dd></div>
+          </dl>
+        </div>
+        <footer class="dialog-actions three-actions">
+          <button type="button" class="danger" id="ht-reject">拒绝</button>
+          <button type="button" class="primary" id="ht-submit">确定</button>
+          <button type="button" data-close="ht-order-backdrop">取消</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="ht-backdrop hidden" id="split-backdrop" role="presentation">
+      <section class="split-dialog" role="dialog" aria-modal="true" aria-labelledby="split-title">
+        <header class="dialog-header">
+          <h2 id="split-title">拆单信息录入</h2>
+          <button type="button" data-close="split-backdrop" aria-label="关闭">×</button>
+        </header>
+        <div class="split-context">框架名称：10001_CNY_QFII　客户名称：JSYR　资金账号：11001000101-CNY　证券代码：000001　证券类型：STOCK　币种：CNY　方向：Buy　价格：市价</div>
+        <div class="split-body">
+          <section class="split-section">
+            <header><h3>拆单明细</h3><button type="button" class="primary" id="split-add">新增</button></header>
+            <div class="split-table-wrap">
+              <table class="split-table">
+                <thead><tr><th>证券代码</th><th>订单类型</th><th class="licensed-market-type">市价类型</th><th>证券类型</th><th>币种</th><th>方向</th><th>状态</th><th>价格</th><th>保护限价</th><th>数量</th><th>对冲渠道</th><th>渠道可用持仓</th><th>订单模式</th><th>算法参数</th><th>备注</th><th>操作</th></tr></thead>
+                <tbody id="split-detail-body"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="split-section">
+            <header><h3>对冲持仓</h3></header>
+            <div class="split-table-wrap">
+              <table class="split-table hedge-table">
+                <thead><tr><th>证券代码</th><th>持仓类型</th><th>对冲渠道</th><th>对冲资金账号</th><th>期初数量</th><th>日间开仓数量</th><th>日间平仓数量</th><th>可用持仓数量</th><th>当前持仓数量</th></tr></thead>
+                <tbody><tr><td>000001</td><td>多头</td><td>QFII</td><td>TESTCMHK</td><td>2700</td><td>0</td><td>0</td><td>2700</td><td>2700</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+        <footer class="dialog-actions">
+          <button type="button" class="primary" id="split-confirm">确认</button>
+          <button type="button" data-close="split-backdrop">取消</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="ht-backdrop nested hidden" id="split-add-backdrop" role="presentation">
+      <section class="split-add-dialog" role="dialog" aria-modal="true" aria-labelledby="split-add-title">
+        <header class="dialog-header">
+          <h2 id="split-add-title">新增拆单</h2>
+          <button type="button" data-close="split-add-backdrop" aria-label="关闭">×</button>
+        </header>
+        <div class="split-add-body">
+          <h3>交易要素</h3>
+          <div class="split-add-form">
+            <label><span>资金账号</span><input value="11001000101-CNY" disabled /></label>
+            <label><span>对冲渠道</span><select><option>QFII</option></select></label>
+            <label><span>订单类型</span><select id="split-order-type"><option value="market">Market</option><option value="limit">Limit</option></select></label>
+            <label id="split-market-type-row" class="licensed-market-type"><span>市价类型</span><select><option>即时成交剩余撤销</option><option>最优五档即时成交剩余撤销</option><option>对手方最优价格</option><option>本方最优价格</option><option>全额成交或撤销</option></select></label>
+            <label><span>框架名称</span><input value="10001_CNY_QFII" disabled /></label>
+            <label><span>币种</span><input value="CNY" disabled /></label>
+            <label><span>证券代码</span><input value="000001" disabled /></label>
+            <label><span>数量</span><input id="split-quantity" type="number" min="1" value="600" /></label>
+            <label id="split-price-row" class="hidden"><span>价格</span><input id="split-price" type="number" min="0" step="0.01" /></label>
+            <label><span>订单方向</span><input value="Buy" disabled /></label>
+            <label><span>算法类型</span><select><option>None</option></select></label>
+            <label><span>订单模式</span><select><option>HighTouch</option></select></label>
+            <label><span>备注</span><input /></label>
+          </div>
+        </div>
+        <footer class="dialog-actions">
+          <button type="button" class="primary" id="split-add-confirm">确定</button>
+          <button type="button" data-close="split-add-backdrop">取消</button>
+        </footer>
+      </section>
+    </div>
+
+    <script src="app.js?v=20260917b"></script>
   </body>
 </html>

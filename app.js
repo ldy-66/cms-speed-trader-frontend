@@ -2,13 +2,20 @@ const state = {
   page: 1,
   orders: Array.from({ length: 13 }, (_, index) => ({
     id: index + 1,
-    trader: '',
-    detail: '',
+    trader: index === 0 ? 'Buy' : '',
+    detail: index === 0 ? 'Market · 即时成交剩余撤销 · 600 · HighTouch' : '',
     customer: 'JSYR',
+    highTouchStatus: index === 0 ? 'pending' : '',
     selected: false,
     visible: true,
   })),
 };
+
+const batchImportRows = [
+  { account: '11001000101-CNY', orderType: 'Market', marketType: '最优五档即时成交剩余撤销', security: '600519', name: '贵州茅台', side: 'Buy', price: '', protection: '1,730.00', quantity: '300', mode: 'HighTouch' },
+  { account: '11001000101-CNY', orderType: 'Market', marketType: '即时成交剩余撤销', security: '000001', name: '平安银行', side: 'Sell', price: '', protection: '', quantity: '600', mode: 'LowTouch' },
+  { account: '11001000101-CNY', orderType: 'Limit', marketType: '', security: '600009', name: '上海机场', side: 'Buy', price: '22.85', protection: '', quantity: '1,000', mode: 'LowTouch' },
+];
 
 // 原型通过本地数据模拟后端返回；生产前端不保存市价类型和保护限价规则。
 const marketTypeLicenseEnabled = new URLSearchParams(window.location.search).get('marketTypeLicense') !== 'off';
@@ -65,14 +72,94 @@ function renderCustomerOrders() {
     const tr = document.createElement('tr');
     tr.dataset.id = order.id;
     tr.classList.toggle('selected', order.selected);
+    let actions = order.selected ? '<button class="link-button row-cancel">撤单</button>' : '';
+    if (order.highTouchStatus === 'pending') {
+      actions = '<button class="row-action" data-ht-action="accept">确认</button><button class="row-action" data-ht-action="cancel">撤单</button>';
+    }
+    if (order.highTouchStatus === 'active') {
+      actions = '<button class="row-action" data-ht-action="direct">直接下单</button><button class="row-action" data-ht-action="split">拆单</button>';
+    }
+    const detail = order.highTouchStatus && !marketTypeLicenseEnabled
+      ? 'Market · 600 · HighTouch'
+      : order.detail;
     tr.innerHTML = `
       <td><input class="row-check" type="checkbox" ${order.selected ? 'checked' : ''} aria-label="选择第${order.id}行" /></td>
-      <td>${order.selected ? '<button class="link-button row-cancel">撤单</button>' : ''}</td>
+      <td>${actions}</td>
       <td>${order.trader}</td>
-      <td>${order.detail}</td>
+      <td>${detail}</td>
       <td class="customer-name">${order.customer}</td>`;
     body.appendChild(tr);
   });
+}
+
+function renderBatchPreview() {
+  $('#batch-preview-body').innerHTML = batchImportRows.map((row, index) => `
+    <tr>
+      <td>${index + 2}</td><td>${row.account}</td><td>${row.orderType}</td><td class="licensed-market-type">${row.marketType}</td><td>${row.security}</td><td>${row.side}</td><td>${row.price}</td><td>${row.protection}</td><td>${row.quantity}</td><td>${row.mode}</td><td class="valid">通过</td>
+    </tr>`).join('');
+  applyLicenceVisibility();
+}
+
+function appendImportedOrders() {
+  const body = $('#entrust-rows');
+  batchImportRows.forEach((row, index) => {
+    const tr = document.createElement('tr');
+    const id = `PL${String(Date.now()).slice(-6)}${index + 1}`;
+    tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${row.security}</td><td>${row.name}</td><td>${row.orderType}</td><td class="licensed-market-type">${row.marketType || '—'}</td><td>${row.side}</td>`;
+    body.appendChild(tr);
+  });
+  applyLicenceVisibility();
+}
+
+function applyLicenceVisibility() {
+  $$('.licensed-market-type').forEach(element => element.classList.toggle('hidden', !marketTypeLicenseEnabled));
+}
+
+function openBatchDialog() {
+  $('#batch-file').value = '';
+  $('#batch-file-name').textContent = '未选择文件';
+  $('#batch-preview').classList.add('hidden');
+  $('#batch-import').disabled = true;
+  $('#batch-backdrop').classList.remove('hidden');
+}
+
+function closeBatchDialog() {
+  $('#batch-backdrop').classList.add('hidden');
+}
+
+function openLayer(id) {
+  document.getElementById(id)?.classList.remove('hidden');
+}
+
+function closeLayer(id) {
+  document.getElementById(id)?.classList.add('hidden');
+}
+
+function activateHighTouchOrder(order) {
+  order.highTouchStatus = 'active';
+  renderCustomerOrders();
+  toast('HighTouch订单已确认');
+}
+
+function toggleSplitOrderFields() {
+  const isMarket = $('#split-order-type').value === 'market';
+  $('#split-market-type-row').classList.toggle('hidden', !isMarket || !marketTypeLicenseEnabled);
+  $('#split-price-row').classList.toggle('hidden', isMarket);
+  if (isMarket) $('#split-price').value = '';
+}
+
+function addSplitDetail() {
+  const quantity = Number($('#split-quantity').value || 0);
+  if (quantity <= 0) return toast('请输入有效数量', 'error');
+  const isMarket = $('#split-order-type').value === 'market';
+  const price = Number($('#split-price').value || 0);
+  if (!isMarket && price <= 0) return toast('请输入有效价格', 'error');
+  const row = isMarket
+    ? ['000001', 'Market', '即时成交剩余撤销', 'STOCK', 'CNY', 'Buy', '待报', '市价', '', quantity, 'QFII', '2700', 'HighTouch', 'None', '', '<button class="link-button split-delete">删除</button>']
+    : ['000001', 'Limit', '', 'STOCK', 'CNY', 'Buy', '待报', price.toFixed(2), '', quantity, 'QFII', '2700', 'HighTouch', 'None', '', '<button class="link-button split-delete">删除</button>'];
+  $('#split-detail-body').insertAdjacentHTML('beforeend', `<tr>${row.map((value, index) => `<td${index === 2 ? ' class="licensed-market-type"' : ''}>${value}</td>`).join('')}</tr>`);
+  applyLicenceVisibility();
+  closeLayer('split-add-backdrop');
 }
 
 function renderOrderBook() {
@@ -249,8 +336,9 @@ function submitConfirmedOrder(snapshot) {
   const orderType = snapshot.isMarket && snapshot.marketTypeLabel && marketTypeLicenseEnabled
     ? `Market · ${snapshot.marketTypeLabel}`
     : (snapshot.isMarket ? 'Market' : 'Limit');
-  tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${snapshot.security}</td><td>${snapshot.securityName}</td><td>${snapshot.isMarket ? 'Market' : 'Limit'}</td><td>${snapshot.isMarket && marketTypeLicenseEnabled ? snapshot.marketTypeLabel : '—'}</td><td>${snapshot.side}</td>`;
+  tr.innerHTML = `<td><button class="link-button entrust-cancel">撤单</button></td><td>${id}</td><td>${snapshot.security}</td><td>${snapshot.securityName}</td><td>${snapshot.isMarket ? 'Market' : 'Limit'}</td><td class="licensed-market-type">${snapshot.isMarket ? snapshot.marketTypeLabel : '—'}</td><td>${snapshot.side}</td>`;
   entrustBody.prepend(tr);
+  applyLicenceVisibility();
   toast(`${snapshot.side === 'Buy' ? '买入' : '卖出'} ${orderType} 委托已加入列表（演示数据）`);
 }
 
@@ -304,6 +392,18 @@ $('#customer-order-rows').addEventListener('click', event => {
   if (!row) return;
   const id = Number(row.dataset.id);
   const order = state.orders.find(item => item.id === id);
+  const highTouchAction = event.target.closest('[data-ht-action]')?.dataset.htAction;
+  if (highTouchAction) {
+    if (highTouchAction === 'accept') activateHighTouchOrder(order);
+    if (highTouchAction === 'cancel') {
+      order.visible = false;
+      renderCustomerOrders();
+      toast('订单已撤销（演示）');
+    }
+    if (highTouchAction === 'direct') openLayer('ht-order-backdrop');
+    if (highTouchAction === 'split') openLayer('split-backdrop');
+    return;
+  }
   if (event.target.matches('.row-cancel')) {
     order.visible = false;
     toast('订单已撤销（演示）');
@@ -323,7 +423,56 @@ $('#cancel-selected').addEventListener('click', () => {
   toast(`已撤销 ${selected.length} 条订单（演示）`);
 });
 $('#cancel-all').addEventListener('click', () => { state.orders.forEach(order => order.visible = false); renderCustomerOrders(); toast('当前页订单已全部撤销（演示）'); });
-$('#batch-order').addEventListener('click', () => toast('批量下单入口已触发'));
+$('#batch-order').addEventListener('click', openBatchDialog);
+
+$('#batch-close').addEventListener('click', closeBatchDialog);
+$('#batch-cancel').addEventListener('click', closeBatchDialog);
+$('#batch-backdrop').addEventListener('click', event => {
+  if (event.target === $('#batch-backdrop')) closeBatchDialog();
+});
+$('#batch-file').addEventListener('change', event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  $('#batch-file-name').textContent = file.name;
+  renderBatchPreview();
+  $('#batch-preview').classList.remove('hidden');
+  $('#batch-import').disabled = false;
+});
+$('#batch-import').addEventListener('click', () => {
+  appendImportedOrders();
+  closeBatchDialog();
+  toast(`已导入 ${batchImportRows.length} 笔订单`);
+});
+
+$$('[data-close]').forEach(button => button.addEventListener('click', () => closeLayer(button.dataset.close)));
+$('#ht-order-backdrop').addEventListener('click', event => {
+  if (event.target === $('#ht-order-backdrop')) closeLayer('ht-order-backdrop');
+});
+$('#split-backdrop').addEventListener('click', event => {
+  if (event.target === $('#split-backdrop')) closeLayer('split-backdrop');
+});
+$('#split-add-backdrop').addEventListener('click', event => {
+  if (event.target === $('#split-add-backdrop')) closeLayer('split-add-backdrop');
+});
+$('#ht-reject').addEventListener('click', () => {
+  closeLayer('ht-order-backdrop');
+  toast('订单已拒绝（演示）');
+});
+$('#ht-submit').addEventListener('click', () => {
+  closeLayer('ht-order-backdrop');
+  toast('HighTouch订单已提交（演示）');
+});
+$('#split-add').addEventListener('click', () => openLayer('split-add-backdrop'));
+$('#split-order-type').addEventListener('change', toggleSplitOrderFields);
+$('#split-add-confirm').addEventListener('click', addSplitDetail);
+$('#split-detail-body').addEventListener('click', event => {
+  if (event.target.matches('.split-delete')) event.target.closest('tr').remove();
+});
+$('#split-confirm').addEventListener('click', () => {
+  if (!$('#split-detail-body').children.length) return toast('请先新增拆单明细', 'error');
+  closeLayer('split-backdrop');
+  toast('拆单已提交（演示）');
+});
 
 $('#filter-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -384,8 +533,12 @@ $('#confirm-order').addEventListener('click', () => {
   closeOrderConfirmation();
 });
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !$('#order-confirm-backdrop').classList.contains('hidden')) {
-    closeOrderConfirmation();
+  if (event.key === 'Escape') {
+    if (!$('#order-confirm-backdrop').classList.contains('hidden')) closeOrderConfirmation();
+    closeBatchDialog();
+    closeLayer('ht-order-backdrop');
+    closeLayer('split-backdrop');
+    closeLayer('split-add-backdrop');
   }
 });
 
@@ -396,4 +549,6 @@ $('#entrust-rows').addEventListener('click', event => {
 });
 
 $('#market-symbol').addEventListener('change', renderOrderBook);
+applyLicenceVisibility();
+toggleSplitOrderFields();
 updateOrderControls();
