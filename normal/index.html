@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 普通版</title>
-    <link rel="stylesheet" href="styles.css?v=20260917a" />
+    <link rel="stylesheet" href="styles.css?v=20260920a" />
   </head>
   <body>
     <div class="app-shell">
@@ -129,7 +129,7 @@
                 <p class="quantity-caption">最大可买 <strong>500</strong></p>
                 <div class="fraction-row"><span></span><div><button type="button" data-ratio=".25">1/4</button><button type="button" data-ratio=".333">1/3</button><button type="button" data-ratio=".5">1/2</button><button type="button" data-ratio="1">全仓</button></div></div>
                 <label class="order-row hidden" id="amount-row"><span>参考金额</span><input id="amount" value="1,185.00 CNY" disabled /></label>
-                <label class="order-row"><span>订单模式</span><select id="order-mode"><option>普通</option><option>HighTouch</option><option>对冲</option></select></label>
+                <label class="order-row"><span>订单模式</span><select id="order-mode"><option>HighTouch</option><option selected>LowTouch</option></select></label>
                 <label class="order-row note-row"><span>备注</span><input id="remark" /></label>
               </form>
               <div class="order-footer"><button class="icon-button" aria-label="设置">⚙</button><button class="icon-button" aria-label="刷新">⟳</button><button class="place-order buy" id="place-order">买入</button></div>
@@ -150,7 +150,7 @@
               <select><option>交易对手名称</option></select>
               <select><option>资金账号名称</option></select>
               <select><option>标的代码</option></select>
-              <select><option>订单模式</option></select>
+              <select><option>订单模式</option><option>HighTouch</option><option>LowTouch</option></select>
               <select><option>订单状态</option></select>
               <button class="outline-blue">展开⌄</button>
               <button class="primary-blue">筛选</button>
@@ -180,6 +180,42 @@
             <section><header>对冲成交列表</header><div class="empty-table-head">序列　　标的代码　　　　成交编号　　　　成交价格　　　　成交数量</div></section>
             <section><header>五档行情</header><div class="orders-quote"><strong>平安银行</strong><span>000001.SZ</span><b>11.70</b></div></section>
           </div>
+        </main>
+
+        <main class="data-workspace hidden" id="data-workspace">
+          <section class="data-query-card">
+            <nav class="data-tabs" aria-label="数据模块导航">
+              <button>资金管理</button><button>持仓信息</button><button>汇率管理</button><button>保证金比例</button><button>成交查询</button><button>对冲持仓</button><button>交易日</button><button class="active">订单查询</button><button>券池持仓</button><button>额度明细</button><button>融券申请查询</button>
+            </nav>
+            <div class="data-query-filters">
+              <div class="quick-dates"><button>今天</button><button>昨天</button><button>最近7天</button><button>最近1个月</button></div>
+              <label>从<input type="date" value="2026-08-21" /></label>
+              <label>到<input type="date" value="2026-09-20" /></label>
+              <select><option>标的代码</option></select>
+              <select><option>交易对手名称</option></select>
+              <select><option>业务类型</option></select>
+              <select><option>订单类型</option><option>限价单</option><option>市价单</option></select>
+              <select><option>订单模式</option><option>HighTouch</option><option>LowTouch</option></select>
+              <button class="data-filter-more">筛选其他条件</button>
+              <button class="data-search">查询</button>
+            </div>
+            <div class="data-query-table-wrap">
+              <table class="data-query-table">
+                <thead><tr><th>序列</th><th>日期</th><th>委托时间</th><th>委托编号</th><th>客户名称</th><th>交易对手名称</th><th>资金账号名称</th><th>标的代码</th><th>标的名称</th><th>交易市场</th><th>订单方向</th><th>委托价格</th><th>委托数量</th><th>订单类型</th><th>委托策略</th><th>保护限价</th><th>订单模式</th><th>订单状态</th><th>业务类型</th><th>下单人</th><th>订单属性</th><th>备注</th><th>反馈信息</th><th>订单信息</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>20260918</td><td>19:40:12</td><td>4076065867362357110</td><td>test167117</td><td>167117</td><td>167117-CNY</td><td><b class="market-code">SH</b> 600519</td><td>贵州茅台</td><td>沪深</td><td class="buy-text">买入</td><td>市价</td><td>300</td><td><span class="order-pill">市价单</span></td><td>最优5档即时成交剩余撤销</td><td>1,730.00</td><td>HighTouch</td><td>已报</td><td>普通交易</td><td>sunjianing</td><td>对冲委托</td><td></td><td></td><td></td></tr>
+                  <tr><td>2</td><td>20260918</td><td>19:28:54</td><td>3447051908951328597</td><td>test167117</td><td>167117</td><td>167117-CNY</td><td><b class="market-code sz">SZ</b> 000001</td><td>平安银行</td><td>沪深</td><td class="sell-text">卖出</td><td>市价</td><td>600</td><td><span class="order-pill">市价单</span></td><td>即时成交剩余撤销</td><td></td><td>LowTouch</td><td>已成</td><td>普通交易</td><td>sunjianing</td><td>对冲委托</td><td></td><td></td><td></td></tr>
+                  <tr><td>3</td><td>20260918</td><td>19:15:03</td><td>4803841040056274240</td><td>9099</td><td>99990109</td><td>99990109购买力账号</td><td><b class="market-code">SH</b> 600009</td><td>上海机场</td><td>沪深</td><td class="buy-text">买入</td><td>22.85</td><td>10,000</td><td><span class="order-pill">限价单</span></td><td></td><td></td><td>LowTouch</td><td>已成</td><td>普通交易</td><td>sunjianing</td><td>对冲委托</td><td></td><td></td><td></td></tr>
+                  <tr><td>4</td><td>20260918</td><td>18:05:16</td><td>3204550658652655493</td><td>9099</td><td>99990109</td><td>99990109购买力账号</td><td><b class="market-code">SH</b> 600099</td><td>林海股份</td><td>沪深</td><td class="sell-text">卖出</td><td>9.92</td><td>18,000</td><td><span class="order-pill">限价单</span></td><td></td><td></td><td>LowTouch</td><td>已成</td><td>普通交易</td><td>sunjianing</td><td>对冲委托</td><td></td><td></td><td></td></tr>
+                  <tr><td>5</td><td>20260918</td><td>17:59:00</td><td>5241393609372812044</td><td>History_Bond</td><td>80882048</td><td>80882048购买力账号</td><td><b class="market-code bj">BJ</b> 430047</td><td>诺思兰德</td><td>北交所</td><td class="buy-text">买入</td><td>市价</td><td>800</td><td><span class="order-pill">市价单</span></td><td>对手方最优价格</td><td>18.60</td><td>HighTouch</td><td>待报</td><td>普通交易</td><td>sunjianing</td><td>对冲委托</td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <footer class="data-query-footer">
+              <div>汇总方式：<label><input type="radio" name="normal-summary" checked /> 委托单笔</label><label><input type="radio" name="normal-summary" /> 标的代码+订单方向</label><label><input type="radio" name="normal-summary" /> 标的代码+订单方向+业务类型</label><label><input type="radio" name="normal-summary" /> 标的代码+订单方向+日期</label></div>
+              <strong>合计：</strong><span>委托数量：29,700　成交数量：28,900　成交金额：752,877,149.68 CNY</span>
+            </footer>
+          </section>
         </main>
       </div>
     </div>
@@ -338,6 +374,6 @@
         </footer>
       </section>
     </div>
-    <script src="app.js?v=20260917a"></script>
+    <script src="app.js?v=20260920a"></script>
   </body>
 </html>

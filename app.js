@@ -173,6 +173,12 @@ function renderOrderBook() {
   $('#order-book').innerHTML = rows.join('');
 }
 
+function showPrimaryWorkspace(section) {
+  const showData = section === '数据';
+  $('#trade-workspace').classList.toggle('hidden', showData);
+  $('#data-workspace').classList.toggle('hidden', !showData);
+}
+
 function calculateAmount() {
   if ($('#order-type').value === 'market') {
     $('#amount').value = '';
@@ -369,8 +375,21 @@ renderOrderBook();
 $$('.nav-item').forEach(button => button.addEventListener('click', () => {
   $$('.nav-item').forEach(item => item.classList.remove('active'));
   button.classList.add('active');
-  if (button.dataset.section !== '交易') toast(`${button.dataset.section}模块为导航演示`);
+  if (['交易', '数据'].includes(button.dataset.section)) {
+    showPrimaryWorkspace(button.dataset.section);
+  } else {
+    showPrimaryWorkspace('交易');
+    toast(`${button.dataset.section}模块为导航演示`);
+  }
 }));
+
+$$('.data-tabs button').forEach(button => button.addEventListener('click', () => {
+  $$('.data-tabs button').forEach(item => item.classList.remove('active'));
+  button.classList.add('active');
+  if (button.textContent.trim() !== '订单查询') toast(`${button.textContent.trim()}为导航演示`);
+}));
+
+$$('.data-search').forEach(button => button.addEventListener('click', () => toast('查询条件已应用')));
 
 $$('.collapsible').forEach(title => title.addEventListener('dblclick', () => {
   const target = document.getElementById(title.dataset.target);

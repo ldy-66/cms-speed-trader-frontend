@@ -110,8 +110,10 @@ function appendImportedOrders() {
 
 function showWorkspace(view) {
   const showOrders = view === 'orders';
-  $('#market-terminal').classList.toggle('hidden', showOrders);
+  const showData = view === 'data';
+  $('#market-terminal').classList.toggle('hidden', showOrders || showData);
   $('#orders-workspace').classList.toggle('hidden', !showOrders);
+  $('#data-workspace').classList.toggle('hidden', !showData);
 }
 
 function openBatchDialog() {
@@ -316,8 +318,18 @@ updateOrderType();
 $$('.nav-item').forEach(button => button.addEventListener('click', () => {
   $$('.nav-item').forEach(item => item.classList.remove('active'));
   button.classList.add('active');
-  showWorkspace(button.dataset.section === '交易' ? 'orders' : 'market');
+  if (button.dataset.section === '交易') showWorkspace('orders');
+  else if (button.dataset.section === '数据') showWorkspace('data');
+  else showWorkspace('market');
 }));
+
+$$('.data-tabs button').forEach(button => button.addEventListener('click', () => {
+  $$('.data-tabs button').forEach(item => item.classList.remove('active'));
+  button.classList.add('active');
+  if (button.textContent.trim() !== '订单查询') toast(`${button.textContent.trim()}为导航演示`, 'info');
+}));
+
+$$('.data-search').forEach(button => button.addEventListener('click', () => toast('查询条件已应用', 'info')));
 
 $$('.top-tab').forEach(button => button.addEventListener('click', () => {
   $$('.top-tab').forEach(item => item.classList.remove('active'));

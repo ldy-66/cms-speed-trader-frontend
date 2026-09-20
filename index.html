@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>对冲台管理端 · 前端复刻</title>
-    <link rel="stylesheet" href="styles.css?v=20260917b" />
+    <link rel="stylesheet" href="styles.css?v=20260920a" />
   </head>
   <body>
     <div class="app-shell">
@@ -47,7 +47,7 @@
           </button>
         </aside>
 
-        <main class="dashboard">
+        <main class="dashboard" id="trade-workspace">
           <section class="left-column">
             <section class="panel sent-orders">
               <div class="panel-title collapsible" data-target="sent-body">
@@ -60,7 +60,7 @@
                   <label class="select-box"><select id="filter-account"><option value="">请输入资金账号名称</option><option>11001000101-CNY</option></select></label>
                   <label class="select-box"><select id="filter-symbol"><option value="">请输入证券代码</option><option>600519</option><option>000001</option></select></label>
                   <label class="select-box"><select id="filter-status"><option value="">请输入订单状态</option><option>已报</option><option>部成</option><option>已成</option></select></label>
-                  <label class="select-box"><select id="filter-mode"><option value="">请输入订单模式</option><option>普通交易</option></select></label>
+                  <label class="select-box"><select id="filter-mode"><option value="">请输入订单模式</option><option>HighTouch</option><option>LowTouch</option></select></label>
                   <label class="select-box"><select id="filter-business"><option value="">请输入业务模式</option><option>普通交易</option></select></label>
                   <button class="button primary" type="submit">筛选</button>
                   <button class="button" type="button" id="reset-filter">重置</button>
@@ -134,7 +134,7 @@
                   <label class="field" id="currency-field"><span>币种</span><input value="CNY" disabled /></label>
                   <label class="field" id="amount-field"><span id="amount-label">委托金额</span><input id="amount" value="-" disabled /></label>
                   <label class="field"><span>算法类型</span><select id="algo"><option>None</option><option>TWAP</option><option>VWAP</option></select></label>
-                  <label class="field"><span>订单模式</span><select id="order-mode"><option value=""></option><option>普通</option><option>对冲</option></select></label>
+                  <label class="field"><span>订单模式</span><select id="order-mode"><option>HighTouch</option><option selected>LowTouch</option></select></label>
                   <label class="field note-field"><span>备注</span><input id="remark" /></label>
                 </div>
                 <div class="submit-row">
@@ -143,6 +143,42 @@
                 </div>
               </form>
             </section>
+          </section>
+        </main>
+
+        <main class="data-workspace hidden" id="data-workspace">
+          <section class="data-query-card">
+            <nav class="data-tabs" aria-label="数据模块导航">
+              <button>资金管理</button><button>持仓信息</button><button>汇率管理</button><button>保证金比例</button><button>成交查询</button><button>对冲持仓</button><button>交易日</button><button class="active">订单查询</button><button>券池持仓</button><button>额度明细</button><button>融券申请查询</button>
+            </nav>
+            <div class="data-query-filters">
+              <div class="quick-dates"><button>今天</button><button>昨天</button><button>最近7天</button><button>最近1个月</button></div>
+              <label>从<input type="date" value="2026-08-21" /></label>
+              <label>到<input type="date" value="2026-09-20" /></label>
+              <select><option>证券代码</option></select>
+              <select><option>交易对手名称</option></select>
+              <select><option>业务类型</option></select>
+              <select><option>订单类型</option><option>Limit</option><option>Market</option></select>
+              <select><option>订单模式</option><option>HighTouch</option><option>LowTouch</option></select>
+              <button class="data-filter-more">筛选其他条件</button>
+              <button class="data-search">查询</button>
+            </div>
+            <div class="data-query-table-wrap">
+              <table class="data-query-table">
+                <thead><tr><th>序列</th><th>日期</th><th>委托时间</th><th>委托编号</th><th>客户名称</th><th>交易对手名称</th><th>资金账号名称</th><th>证券代码</th><th>证券名称</th><th>交易市场</th><th>订单方向</th><th>委托价格</th><th>委托数量</th><th>订单类型</th><th>委托策略</th><th>保护限价</th><th>订单模式</th><th>订单状态</th><th>业务类型</th><th>下单人</th><th>备注</th><th>反馈信息</th><th>订单信息</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>20260918</td><td>19:40:12</td><td>4076065867362357110</td><td>JSYR</td><td>167117</td><td>11001000101-CNY</td><td><b class="market-code">SH</b> 600519</td><td>贵州茅台</td><td>沪深</td><td class="buy-text">Buy</td><td>市价</td><td>300</td><td><span class="order-pill">Market</span></td><td>最优5档即时成交剩余撤销</td><td>1,730.00</td><td>HighTouch</td><td>已报</td><td>普通交易</td><td>admin</td><td></td><td></td><td></td></tr>
+                  <tr><td>2</td><td>20260918</td><td>19:28:54</td><td>3447051908951328597</td><td>JSYR</td><td>167117</td><td>11001000101-CNY</td><td><b class="market-code sz">SZ</b> 000001</td><td>平安银行</td><td>沪深</td><td class="sell-text">Sell</td><td>市价</td><td>600</td><td><span class="order-pill">Market</span></td><td>即时成交剩余撤销</td><td></td><td>LowTouch</td><td>已成</td><td>普通交易</td><td>admin</td><td></td><td></td><td></td></tr>
+                  <tr><td>3</td><td>20260918</td><td>19:15:03</td><td>4803841040056274240</td><td>9099</td><td>99990109</td><td>99990109购买力账号</td><td><b class="market-code">SH</b> 600009</td><td>上海机场</td><td>沪深</td><td class="buy-text">Buy</td><td>22.85</td><td>10,000</td><td><span class="order-pill">Limit</span></td><td></td><td></td><td>LowTouch</td><td>已成</td><td>普通交易</td><td>admin</td><td></td><td></td><td></td></tr>
+                  <tr><td>4</td><td>20260918</td><td>18:05:16</td><td>3204550658652655493</td><td>9099</td><td>99990109</td><td>99990109购买力账号</td><td><b class="market-code">SH</b> 600099</td><td>林海股份</td><td>沪深</td><td class="sell-text">Sell</td><td>9.92</td><td>18,000</td><td><span class="order-pill">Limit</span></td><td></td><td></td><td>LowTouch</td><td>已成</td><td>普通交易</td><td>admin</td><td></td><td></td><td></td></tr>
+                  <tr><td>5</td><td>20260918</td><td>17:59:00</td><td>5241393609372812044</td><td>JSYR</td><td>167117</td><td>11001000101-CNY</td><td><b class="market-code bj">BJ</b> 430047</td><td>诺思兰德</td><td>北交所</td><td class="buy-text">Buy</td><td>市价</td><td>800</td><td><span class="order-pill">Market</span></td><td>对手方最优价格</td><td>18.60</td><td>HighTouch</td><td>待报</td><td>普通交易</td><td>admin</td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <footer class="data-query-footer">
+              <div>汇总方式：<label><input type="radio" name="speed-summary" checked /> 委托单笔</label><label><input type="radio" name="speed-summary" /> 证券代码+订单方向</label><label><input type="radio" name="speed-summary" /> 证券代码+订单方向+业务类型</label><label><input type="radio" name="speed-summary" /> 证券代码+订单方向+日期</label></div>
+              <strong>合计：</strong><span>委托数量：29,700　成交数量：28,900　成交金额：752,877,149.68 CNY</span>
+            </footer>
           </section>
         </main>
       </div>
@@ -293,6 +329,6 @@
       </section>
     </div>
 
-    <script src="app.js?v=20260917b"></script>
+    <script src="app.js?v=20260920a"></script>
   </body>
 </html>
