@@ -95,7 +95,7 @@ function requestOrderEntryConfig(code) {
 function renderBatchPreview() {
   $('#batch-preview-body').innerHTML = batchImportRows.map((row, index) => `
     <tr>
-      <td>${index + 2}</td><td>${row.business}</td><td>${row.account}</td><td>${row.orderType}</td><td>${row.marketType}</td><td>${row.security}</td><td>${row.side}</td><td>${row.price}</td><td>${row.protection}</td><td>${row.quantity}</td><td>${row.mode}</td><td class="valid">通过</td>
+      <td>${index + 2}</td><td>${row.business}</td><td>${row.account}</td><td>${row.orderType}</td><td>${row.security}</td><td>${row.marketType}</td><td>${row.side}</td><td>${row.price}</td><td>${row.protection}</td><td>${row.quantity}</td><td>${row.mode}</td><td class="valid">通过</td>
     </tr>`).join('');
 }
 
